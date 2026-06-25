@@ -1,0 +1,581 @@
+/* CSS for Warranty Request Management Module */
+
+.manage-warranty-page {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f4f6f9;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+.warranty-shell {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+/* Breadcrumb styling */
+.warranty-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #6c757d;
+    margin-bottom: 24px;
+}
+
+.warranty-breadcrumb a {
+    color: #dc3545;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.warranty-breadcrumb a:hover {
+    color: #a71d2a;
+    text-decoration: underline;
+}
+
+.warranty-breadcrumb strong {
+    color: #212529;
+    font-weight: 600;
+}
+
+/* Hero Header & Statistics cards */
+.warranty-hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.warranty-hero-copy h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #212529;
+    margin: 0 0 6px 0;
+}
+
+.warranty-hero-copy p {
+    font-size: 15px;
+    color: #6c757d;
+    margin: 0;
+}
+
+.warranty-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.warranty-stat-card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border-left: 5px solid #6c757d;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.warranty-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.warranty-stat-card.stat-pending { border-left-color: #fd7e14; }
+.warranty-stat-card.stat-processing { border-left-color: #0d6efd; }
+.warranty-stat-card.stat-completed { border-left-color: #198754; }
+.warranty-stat-card.stat-rejected { border-left-color: #dc3545; }
+
+.stat-icon {
+    font-size: 28px;
+    background: #f8f9fa;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+}
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-title {
+    font-size: 13px;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 4px 0;
+    font-weight: 600;
+}
+
+.stat-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #212529;
+    margin: 0;
+}
+
+/* Search & Filters */
+.warranty-filters {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    margin-bottom: 25px;
+}
+
+.filters-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: flex-end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    min-width: 200px;
+}
+
+.filter-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #495057;
+}
+
+.filter-input, .filter-select {
+    padding: 10px 14px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    background-color: #fff;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.filter-input:focus, .filter-select:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.15);
+}
+
+.filters-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-search {
+    background: #dc3545;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    white-space: nowrap;
+}
+
+.btn-search:hover {
+    background: #bd2130;
+}
+
+.btn-search:active {
+    transform: scale(0.98);
+}
+
+.btn-reset {
+    background: #e2e6ea;
+    color: #495057;
+    border: 1px solid #ced4da;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn-reset:hover {
+    background: #dae0e5;
+}
+
+/* Master Data Table */
+.warranty-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    margin-bottom: 40px;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.warranty-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #30333a;
+    font-size: 14px;
+}
+
+.warranty-table th,
+.warranty-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #eceff4;
+    border-right: 1px solid #eceff4;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.warranty-table th:last-child,
+.warranty-table td:last-child {
+    border-right: 0;
+}
+
+.warranty-table th {
+    background: #fafbfe;
+    color: #252932;
+    font-weight: 800;
+    text-align: center;
+}
+
+.warranty-table tr:hover {
+    background-color: #fafbfe;
+}
+
+.req-id {
+    font-family: monospace;
+    font-weight: 700;
+    color: #ed1c24;
+    background: #fdf2f2;
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid #fbd5d5;
+}
+
+.order-link {
+    font-family: monospace;
+    font-weight: 600;
+    color: #0d6efd;
+    text-decoration: none;
+}
+
+.order-link:hover {
+    text-decoration: underline;
+}
+
+/* Colored Status Badges - Sleek Rectangular Layout matching Brand */
+.status-badge {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.status-badge.status-1 { background-color: #ffe8cc; color: #d9480f; } /* Chờ tiếp nhận */
+.status-badge.status-2 { background-color: #e7f5ff; color: #1971c2; } /* Đang xử lý / Đã tiếp nhận */
+.status-badge.status-3 { background-color: #fff0f6; color: #c2255c; } /* Từ chối */
+.status-badge.status-4 { background-color: #ebfbee; color: #2b8a3e; } /* Hoàn tất */
+
+/* Action buttons - Blocky, rectangular layout matching Brand */
+.btn-action-group {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn-action {
+    min-width: 110px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 5px;
+    color: #fff;
+    padding: 0 12px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+
+.btn-view {
+    background-color: #ff9f0a; /* Warning yellow/orange matching brand edit */
+}
+
+.btn-view:hover {
+    background-color: #e08b00;
+}
+
+.btn-edit {
+    background-color: #ed1c24; /* Red color matching Brand delete/primary red */
+}
+
+.btn-edit:hover {
+    background-color: #d1121b;
+}
+
+/* Modals Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Modal Content Card */
+.modal-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    width: 100%;
+    max-width: 650px;
+    max-height: 90%;
+    overflow-y: auto;
+    transform: scale(0.9);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-overlay.active .modal-card {
+    transform: scale(1);
+}
+
+.modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #212529;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #6c757d;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+}
+
+.modal-close:hover {
+    color: #333;
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+/* Alert/Info styling inside modal */
+.alert-box {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.alert-box.success { background-color: #ebfbee; color: #2b8a3e; border: 1px solid #b2f2bb; }
+.alert-box.error { background-color: #fff0f6; color: #c2255c; border: 1px solid #fcc2d7; }
+
+/* Grid styling inside modal */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.info-item label {
+    font-size: 12px;
+    color: #868e96;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.info-item span {
+    font-size: 15px;
+    color: #212529;
+    font-weight: 500;
+}
+
+/* Form Styles */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #495057;
+}
+
+
+
+/* History Timeline styles inside condition modal */
+.timeline-section {
+    margin-top: 25px;
+    border-top: 1px solid #e9ecef;
+    padding-top: 20px;
+}
+
+.timeline-section h4 {
+    margin: 0 0 16px 0;
+    font-size: 15px;
+    color: #495057;
+    font-weight: 700;
+}
+
+.timeline-list {
+    position: relative;
+    padding-left: 20px;
+    border-left: 2px solid #dee2e6;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    list-style: none;
+    margin: 0;
+}
+
+.timeline-item {
+    position: relative;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -27px;
+    top: 4px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #dee2e6;
+    border: 2px solid #fff;
+}
+
+.timeline-item.active::before {
+    background-color: #1971c2;
+}
+
+.timeline-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #868e96;
+    margin-bottom: 4px;
+}
+
+.timeline-date {
+    font-weight: 600;
+}
+
+.timeline-status {
+    font-weight: 700;
+}
+
+.timeline-request {
+    font-size: 14px;
+    font-weight: 500;
+    color: #212529;
+    margin-bottom: 4px;
+}
+
+.timeline-response {
+    font-size: 13px;
+    color: #6c757d;
+    background: #f8f9fa;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border-left: 3px solid #ced4da;
+    margin: 4px 0 0 0;
+}
+
+/* Remaining Days color indications */
+.remaining-active { color: #2b8a3e; font-weight: bold; }
+.remaining-expiring { color: #f59f00; font-weight: bold; }
+.remaining-expired { color: #c2255c; font-weight: bold; }
+
+/* Empty state message */
+.empty-table-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #868e96;
+}
+
+.empty-table-state .icon {
+    font-size: 40px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.empty-table-state h3 {
+    margin: 0 0 6px 0;
+    font-size: 18px;
+    color: #495057;
+}
+
+.empty-table-state p {
+    margin: 0;
+    font-size: 14px;
+}

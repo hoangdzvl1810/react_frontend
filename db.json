@@ -1,0 +1,425 @@
+{
+  "categories": [
+    {
+      "id": 1,
+      "name": "Bộ vi xử lý"
+    },
+    {
+      "id": 2,
+      "name": "Bo mạch chủ"
+    },
+    {
+      "id": 3,
+      "name": "Bộ nhớ RAM"
+    },
+    {
+      "id": 4,
+      "name": "Card đồ họa"
+    },
+    {
+      "id": 5,
+      "name": "Ổ cứng SSD"
+    },
+    {
+      "id": 6,
+      "name": "Nguồn máy tính"
+    },
+    {
+      "id": 7,
+      "name": "Vỏ máy tính"
+    },
+    {
+      "id": 8,
+      "name": "Màn hình"
+    },
+    {
+      "id": 9,
+      "name": "Bàn phím"
+    },
+    {
+      "id": 10,
+      "name": "Chuột"
+    }
+  ],
+  "brands": [
+    {
+      "id": 1,
+      "name": "AMD"
+    },
+    {
+      "id": 2,
+      "name": "ASUS"
+    },
+    {
+      "id": 3,
+      "name": "Gigabyte"
+    },
+    {
+      "id": 4,
+      "name": "Intel"
+    },
+    {
+      "id": 5,
+      "name": "Kingston"
+    },
+    {
+      "id": 6,
+      "name": "MSI"
+    },
+    {
+      "id": 7,
+      "name": "Corsair"
+    },
+    {
+      "id": 8,
+      "name": "Samsung"
+    },
+    {
+      "id": 9,
+      "name": "Dell"
+    },
+    {
+      "id": 10,
+      "name": "Logitech"
+    },
+    {
+      "id": 11,
+      "name": "Razer"
+    },
+    {
+      "id": 12,
+      "name": "NZXT"
+    }
+  ],
+  "products": [
+    {
+      "id": 1,
+      "name": "AMD Ryzen 5 7600",
+      "price": 5500000,
+      "stock": 20,
+      "categoryId": 1,
+      "brandId": 1,
+      "image": "amd-ryzen-5-7600.jpg",
+      "description": "AMD Ryzen 5 7600 có 6 nhân 12 luồng, hỗ trợ socket AM5, RAM DDR5 và mang lại hiệu năng chơi game tốt trong tầm giá."
+    },
+    {
+      "id": 2,
+      "name": "AMD Ryzen 7 7700X",
+      "price": 8500000,
+      "stock": 36,
+      "categoryId": 1,
+      "brandId": 1,
+      "image": "amd-ryzen-7-7700x.jpg",
+      "description": "AMD Ryzen 7 7700X có 8 nhân 16 luồng, phù hợp cho chơi game, livestream và sáng tạo nội dung trên nền tảng AM5."
+    },
+    {
+      "id": 3,
+      "name": "Intel Core i5-12400F",
+      "price": 4200000,
+      "stock": 46,
+      "categoryId": 1,
+      "brandId": 4,
+      "image": "intel-core-i5-12400f.jpg",
+      "description": "Intel Core i5-12400F có 6 nhân 12 luồng, sử dụng socket LGA1700 và phù hợp cho học tập, làm việc văn phòng, chơi game."
+    },
+    {
+      "id": 4,
+      "name": "ASUS PRIME B650M-A",
+      "price": 3800000,
+      "stock": 43,
+      "categoryId": 2,
+      "brandId": 2,
+      "image": "asus-prime-b650m-a.jpg",
+      "description": "ASUS PRIME B650M-A là bo mạch chủ AM5 hỗ trợ RAM DDR5, hoạt động ổn định cho các bộ máy dùng Ryzen 7000."
+    },
+    {
+      "id": 5,
+      "name": "Kingston Fury Beast 16GB DDR5",
+      "price": 1500000,
+      "stock": 31,
+      "categoryId": 3,
+      "brandId": 5,
+      "image": "kingston-fury-beast-16gb-ddr5.jpg",
+      "description": "Kingston Fury Beast 16GB DDR5 mang lại hiệu năng ổn định cho các nền tảng AMD và Intel đời mới."
+    },
+    {
+      "id": 6,
+      "name": "MSI GeForce RTX 4060 Ventus 2X",
+      "price": 9500000,
+      "stock": 46,
+      "categoryId": 4,
+      "brandId": 6,
+      "image": "msi-rtx-4060-ventus-2x.jpg",
+      "description": "MSI GeForce RTX 4060 Ventus 2X hỗ trợ Ray Tracing, DLSS 3 và chơi game Full HD mượt mà."
+    },
+    {
+      "id": 7,
+      "name": "AMD Ryzen 9 7900X",
+      "price": 11900000,
+      "stock": 46,
+      "categoryId": 1,
+      "brandId": 1,
+      "image": "amd-ryzen-9-7900x.jpg",
+      "description": "AMD Ryzen 9 7900X có 12 nhân 24 luồng, phù hợp cho chơi game cao cấp, livestream và xử lý công việc chuyên nghiệp."
+    },
+    {
+      "id": 8,
+      "name": "Intel Core i7-13700K",
+      "price": 10500000,
+      "stock": 20,
+      "categoryId": 1,
+      "brandId": 4,
+      "image": "intel-core-i7-13700k.jpg",
+      "description": "Intel Core i7-13700K mang lại hiệu năng mạnh cho chơi game và các tác vụ làm việc nặng trên nền tảng LGA1700."
+    },
+    {
+      "id": 9,
+      "name": "Intel Core i9-13900K",
+      "price": 14900000,
+      "stock": 16,
+      "categoryId": 1,
+      "brandId": 4,
+      "image": "intel-core-i9-13900k.jpg",
+      "description": "Intel Core i9-13900K là bộ vi xử lý cao cấp dành cho đa nhiệm nặng, dựng hình và chơi game tần số quét cao."
+    },
+    {
+      "id": 10,
+      "name": "ASUS ROG STRIX B650-A GAMING WIFI",
+      "price": 5900000,
+      "stock": 38,
+      "categoryId": 2,
+      "brandId": 2,
+      "image": "asus-rog-strix-b650a.jpg",
+      "description": "ASUS ROG STRIX B650-A GAMING WIFI hỗ trợ AMD AM5, RAM DDR5, card đồ họa PCIe 4.0 và kết nối WiFi."
+    },
+    {
+      "id": 11,
+      "name": "ASUS TUF GAMING B760M-PLUS WIFI",
+      "price": 4700000,
+      "stock": 40,
+      "categoryId": 2,
+      "brandId": 2,
+      "image": "asus-tuf-b760m.jpg",
+      "description": "ASUS TUF GAMING B760M-PLUS WIFI hỗ trợ CPU Intel LGA1700, RAM DDR5 và các cấu hình chơi game ổn định."
+    },
+    {
+      "id": 12,
+      "name": "Gigabyte B760M DS3H DDR5",
+      "price": 3200000,
+      "stock": 51,
+      "categoryId": 2,
+      "brandId": 3,
+      "image": "gigabyte-b760m-ds3h.jpg",
+      "description": "Gigabyte B760M DS3H DDR5 hỗ trợ CPU Intel thế hệ 12 và 13 cùng bộ nhớ DDR5."
+    },
+    {
+      "id": 13,
+      "name": "Gigabyte B650 Gaming X AX",
+      "price": 5200000,
+      "stock": 40,
+      "categoryId": 2,
+      "brandId": 3,
+      "image": "gigabyte-b650-gamingx.jpg",
+      "description": "Gigabyte B650 Gaming X AX hỗ trợ CPU AMD AM5, RAM DDR5 và nhiều tính năng mở rộng hiện đại."
+    },
+    {
+      "id": 14,
+      "name": "Kingston Fury Beast 32GB DDR5",
+      "price": 2800000,
+      "stock": 54,
+      "categoryId": 3,
+      "brandId": 5,
+      "image": "kingston-fury-32gb.jpg",
+      "description": "Kingston Fury Beast 32GB DDR5 phù hợp cho chơi game, đa nhiệm và công việc sáng tạo nội dung."
+    },
+    {
+      "id": 15,
+      "name": "Kingston Fury Beast 64GB DDR5",
+      "price": 5900000,
+      "stock": 45,
+      "categoryId": 3,
+      "brandId": 5,
+      "image": "kingston-fury-64gb.jpg",
+      "description": "Kingston Fury Beast 64GB DDR5 dành cho máy trạm, dựng phim, chỉnh ảnh và đa nhiệm nặng."
+    },
+    {
+      "id": 16,
+      "name": "MSI RTX 4070 Ventus 3X",
+      "price": 16500000,
+      "stock": 28,
+      "categoryId": 4,
+      "brandId": 6,
+      "image": "msi-rtx4070.jpg",
+      "description": "MSI RTX 4070 Ventus 3X hỗ trợ DLSS 3 và Ray Tracing, phù hợp cho chơi game 2K hiệu năng cao."
+    },
+    {
+      "id": 17,
+      "name": "MSI RTX 4070 Ti Gaming X Trio",
+      "price": 21900000,
+      "stock": 29,
+      "categoryId": 4,
+      "brandId": 6,
+      "image": "msi-rtx4070ti.jpg",
+      "description": "MSI RTX 4070 Ti Gaming X Trio mang lại hiệu năng mạnh cho chơi game 2K và 4K."
+    },
+    {
+      "id": 18,
+      "name": "MSI RTX 4080 Super Gaming X Trio",
+      "price": 32900000,
+      "stock": 46,
+      "categoryId": 4,
+      "brandId": 6,
+      "image": "msi-rtx4080super.jpg",
+      "description": "MSI RTX 4080 Super Gaming X Trio là card đồ họa cao cấp dành cho chơi game 4K và sáng tạo nội dung."
+    },
+    {
+      "id": 19,
+      "name": "Samsung 980 Pro 1TB",
+      "price": 2300000,
+      "stock": 43,
+      "categoryId": 5,
+      "brandId": 8,
+      "image": "samsung-980-pro-1tb.jpg",
+      "description": "Ổ cứng SSD Samsung 980 Pro 1TB PCIe 4.0 NVMe siêu tốc, lý tưởng cho hệ thống gaming và render."
+    },
+    {
+      "id": 20,
+      "name": "Kingston NV2 500GB",
+      "price": 950000,
+      "stock": 12,
+      "categoryId": 5,
+      "brandId": 5,
+      "image": "kingston-nv2-500gb.jpg",
+      "description": "Ổ cứng SSD Kingston NV2 500GB PCIe 4.0, giải pháp lưu trữ tiết kiệm và hiệu quả."
+    },
+    {
+      "id": 21,
+      "name": "Corsair RM850x 850W",
+      "price": 3500000,
+      "stock": 50,
+      "categoryId": 6,
+      "brandId": 7,
+      "image": "corsair-rm850x.jpg",
+      "description": "Nguồn máy tính Corsair RM850x 850W 80 Plus Gold Full Modular, hiệu năng cao và yên tĩnh."
+    },
+    {
+      "id": 22,
+      "name": "Gigabyte P650B 650W",
+      "price": 1200000,
+      "stock": 24,
+      "categoryId": 6,
+      "brandId": 3,
+      "image": "gigabyte-p650b.jpg",
+      "description": "Nguồn máy tính Gigabyte P650B 650W 80 Plus Bronze, phù hợp cho cấu hình tầm trung."
+    },
+    {
+      "id": 23,
+      "name": "Corsair 4000D Airflow",
+      "price": 1900000,
+      "stock": 38,
+      "categoryId": 7,
+      "brandId": 7,
+      "image": "corsair-4000d.jpg",
+      "description": "Vỏ case Corsair 4000D Airflow Tempered Glass, tối ưu luồng gió làm mát hệ thống."
+    },
+    {
+      "id": 24,
+      "name": "NZXT H510",
+      "price": 1800000,
+      "stock": 43,
+      "categoryId": 7,
+      "brandId": 12,
+      "image": "nzxt-h510.jpg",
+      "description": "Vỏ case NZXT H510 Mid Tower thiết kế tối giản, tinh tế, tích hợp sẵn quản lý cáp."
+    },
+    {
+      "id": 25,
+      "name": "Dell UltraSharp U2720Q",
+      "price": 12500000,
+      "stock": 20,
+      "categoryId": 8,
+      "brandId": 9,
+      "image": "dell-u2720q.jpg",
+      "description": "Màn hình Dell UltraSharp U2720Q 27 inch 4K IPS, màu sắc chuẩn xác cho thiết kế đồ họa."
+    },
+    {
+      "id": 26,
+      "name": "ASUS TUF Gaming VG27AQ",
+      "price": 7500000,
+      "stock": 52,
+      "categoryId": 8,
+      "brandId": 2,
+      "image": "asus-tuf-vg27aq.jpg",
+      "description": "Màn hình ASUS TUF Gaming VG27AQ 27 inch 2K 165Hz IPS, mượt mà cho trải nghiệm gaming."
+    },
+    {
+      "id": 27,
+      "name": "Logitech G Pro X Keyboard",
+      "price": 3200000,
+      "stock": 23,
+      "categoryId": 9,
+      "brandId": 10,
+      "image": "logitech-g-pro-x-kb.jpg",
+      "description": "Bàn phím cơ Logitech G Pro X chuyên game, switch thay thế được."
+    },
+    {
+      "id": 28,
+      "name": "Logitech G502 Hero",
+      "price": 1100000,
+      "stock": 10,
+      "categoryId": 10,
+      "brandId": 10,
+      "image": "logitech-g502-hero.jpg",
+      "description": "Chuột gaming Logitech G502 Hero cảm biến 25K cao cấp, thiết kế công thái học."
+    },
+    {
+      "id": 29,
+      "name": "Razer DeathAdder V3 Pro",
+      "price": 3500000,
+      "stock": 56,
+      "categoryId": 10,
+      "brandId": 11,
+      "image": "razer-dav3-pro.jpg",
+      "description": "Chuột không dây siêu nhẹ Razer DeathAdder V3 Pro, thiết kế ergonomic hàng đầu."
+    }
+  ],
+  "users": [
+    {
+      "id": 1,
+      "fullName": "Bùi Phúc",
+      "email": "nguyenngoccham120705@gmail.com",
+      "password": "123",
+      "role": "ADMIN"
+    },
+    {
+      "id": 2,
+      "fullName": "Nguyễn Văn Nam",
+      "email": "nguyenvannam@gmail.com",
+      "password": "123",
+      "role": "ADMIN"
+    },
+    {
+      "id": 3,
+      "fullName": "Trần Minh Quân",
+      "email": "tranminhquan@gmail.com",
+      "password": "123",
+      "role": "ADMIN"
+    },
+    {
+      "id": 4,
+      "fullName": "Lê Hoàng Anh",
+      "email": "lehoanganh@gmail.com",
+      "password": "123",
+      "role": "CUSTOMER"
+    },
+    {
+      "id": 5,
+      "fullName": "Phạm Thu Trang",
+      "email": "phamthutrang@gmail.com",
+      "password": "123",
+      "role": "CUSTOMER"
+    }
+  ],
+  "orders": [],
+  "cart": []
+}
