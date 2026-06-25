@@ -418,8 +418,56 @@
       "email": "phamthutrang@gmail.com",
       "password": "123",
       "role": "CUSTOMER"
+    },
+    {
+      "fullName": "Đào Duy Hiếu - HE191090",
+      "email": "duyh2934@gmail.com",
+      "password": "123",
+      "role": "CUSTOMER",
+      "id": 6
+    },
+    {
+      "fullName": "hieue 1",
+      "email": "amirus2610@gmail.com",
+      "password": "123",
+      "role": "CUSTOMER",
+      "id": 7
     }
   ],
-  "orders": [],
+  "orders": [
+    {
+      "userId": 6,
+      "address": "ĐÁN",
+      "phone": "ZXCB",
+      "totalPrice": 98000000,
+      "status": "Đang xử lý",
+      "date": "2026-06-25T10:27:58.165Z",
+      "items": [
+        {
+          "id": 1,
+          "name": "AMD Ryzen 5 7600",
+          "price": 5500000,
+          "stock": 20,
+          "categoryId": 1,
+          "brandId": 1,
+          "image": "amd-ryzen-5-7600.jpg",
+          "description": "AMD Ryzen 5 7600 có 6 nhân 12 luồng, hỗ trợ socket AM5, RAM DDR5 và mang lại hiệu năng chơi game tốt trong tầm giá.",
+          "quantity": 14
+        },
+        {
+          "id": 8,
+          "name": "Intel Core i7-13700K",
+          "price": 10500000,
+          "stock": 20,
+          "categoryId": 1,
+          "brandId": 4,
+          "image": "intel-core-i7-13700k.jpg",
+          "description": "Intel Core i7-13700K mang lại hiệu năng mạnh cho chơi game và các tác vụ làm việc nặng trên nền tảng LGA1700.",
+          "quantity": 2
+        }
+      ],
+      "id": 1
+    }
+  ],
   "cart": []
 }
