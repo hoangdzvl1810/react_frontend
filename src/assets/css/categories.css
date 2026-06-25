@@ -390,6 +390,19 @@ body.categories-page {
     color: #fff;
 }
 
+.add-to-cart-btn:disabled {
+    border-color: #e5e7eb;
+    background: #f3f4f6;
+    color: #9ca3af;
+    cursor: not-allowed;
+}
+
+.add-to-cart-btn:disabled:hover {
+    border-color: #e5e7eb;
+    background: #f3f4f6;
+    color: #9ca3af;
+}
+
 .server-message {
     padding: 14px 20px;
     margin-bottom: 20px;
