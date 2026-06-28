@@ -1,9 +1,15 @@
-const brandImages = import.meta.glob('../assets/images/brands/*', {
-    eager: true,
-    query: '?url',
-    import: 'default',
-});
+const brandImages = require.context(
+    '../assets/images/brands',
+    false,
+    /\.(avif|gif|jpe?g|png|svg|webp)$/i,
+);
 
 export function getBrandImage(imageName) {
-    return brandImages[`../assets/images/brands/${imageName}`] || '';
+    if (!imageName) return '';
+
+    try {
+        return brandImages(`./${imageName}`);
+    } catch {
+        return '';
+    }
 }
