@@ -2,7 +2,9 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import Home from './pages/Home';
 import Login from './pages/Login';
+import Register from './pages/Register';
 import Categories from './pages/Categories';
+import Brands from './pages/Brands';
 import ProductDetail from './pages/ProductDetail';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
@@ -14,6 +16,7 @@ import AdminProducts from './pages/AdminProducts';
 import './assets/css/style.css';
 import './assets/css/admin-products.css';
 import './assets/css/categories.css';
+import './assets/css/brands.css';
 import './assets/css/product-detail.css';
 
 function App() {
@@ -21,10 +24,12 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="categories" element={<Categories />} />
+          <Route path="brands" element={<Brands />} />
           <Route path="product-detail/:id" element={<ProductDetail />} />
           <Route path="cart" element={<Cart />} />
           <Route path="checkout" element={<Checkout />} />

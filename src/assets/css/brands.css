@@ -110,6 +110,17 @@ body.brands-page {
     color: #4b5563;
     font-size: 13px;
     font-weight: 600;
+    cursor: pointer;
+}
+
+.filter-panel label.is-checked {
+    color: #ed1c24;
+    font-weight: 800;
+}
+
+.brand-count {
+    color: #9ca3af;
+    font-weight: 500;
 }
 
 .filter-panel input[type="checkbox"],
@@ -152,6 +163,10 @@ body.brands-page {
     color: #fff;
     font-weight: 800;
     cursor: pointer;
+}
+
+.filter-panel button:hover {
+    background: #111827;
 }
 
 .brand-content {
