@@ -1,5 +1,5 @@
 import axios from 'axios';
-import database from '../../db.json';
+import database from '../data/db.json';
 
 const API_URL = 'http://localhost:3001';
 const LOCAL_CREATED_KEY = 'localCreatedRecords';

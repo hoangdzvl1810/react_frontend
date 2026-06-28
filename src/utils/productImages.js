@@ -1,9 +1,15 @@
-const productImages = import.meta.glob('../assets/images/products/*', {
-    eager: true,
-    query: '?url',
-    import: 'default',
-});
+const productImages = require.context(
+    '../assets/images/products',
+    false,
+    /\.(avif|gif|jpe?g|png|svg|webp)$/i,
+);
 
 export function getProductImage(imageName) {
-    return productImages[`../assets/images/products/${imageName}`] || '';
+    if (!imageName) return '';
+
+    try {
+        return productImages(`./${imageName}`);
+    } catch {
+        return '';
+    }
 }
