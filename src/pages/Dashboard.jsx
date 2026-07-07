@@ -1,59 +1,103 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { getCollection } from "../services/api";
 
 export default function Dashboard() {
-    const [stats, setStats] = useState({ products: 0, orders: 0, users: 0 });
-    const navigate = useNavigate();
+  const [stats, setStats] = useState({
+    products: 0,
+    orders: 0,
+    customers: 0,
+    categories: 0,
+    brands: 0,
+    revenue: 0,
+    pendingOrders: 0,
+    lowStock: 0,
+  });
 
-    useEffect(() => {
-        const user = JSON.parse(localStorage.getItem('account'));
-        if (!user || user.role !== 'ADMIN') {
-            navigate('/login');
-            return;
-        }
+  useEffect(() => {
+    const loadData = async () => {
+      const [products, orders, users, categories, brands] = await Promise.all([
+        getCollection("products"),
+        getCollection("orders"),
+        getCollection("users"),
+        getCollection("categories"),
+        getCollection("brands"),
+      ]);
 
-        const fetchStats = async () => {
-            try {
-                const prodRes = await axios.get('http://localhost:3001/products');
-                const orderRes = await axios.get('http://localhost:3001/orders');
-                const userRes = await axios.get('http://localhost:3001/users');
-                
-                setStats({
-                    products: prodRes.data.length,
-                    orders: orderRes.data.length,
-                    users: userRes.data.length
-                });
-            } catch (err) {
-                console.error("Lỗi lấy dữ liệu thống kê", err);
-            }
-        };
-        fetchStats();
-    }, [navigate]);
+      const activeCategories = categories.filter(
+        (item) => item.status !== "INACTIVE"
+      );
 
-    return (
-        <div style={{ padding: '40px', maxWidth: '1200px', margin: '0 auto', minHeight: '60vh' }}>
-            <h2 style={{ borderBottom: '2px solid #eee', paddingBottom: '10px' }}>Admin Dashboard</h2>
-            
-            <div style={{ display: 'flex', gap: '30px', marginTop: '30px' }}>
-                <div style={{ flex: 1, padding: '40px 20px', backgroundColor: '#e3f2fd', borderRadius: '12px', textAlign: 'center', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
-                    <i className="fa-solid fa-microchip" style={{ fontSize: '40px', color: '#1565c0', marginBottom: '15px' }}></i>
-                    <h3 style={{ color: '#555' }}>Sản Phẩm Trong Kho</h3>
-                    <p style={{ fontSize: '48px', fontWeight: 'bold', color: '#1565c0', marginTop: '10px' }}>{stats.products}</p>
-                </div>
+      const activeBrands = brands.filter(
+        (item) => item.status !== "INACTIVE"
+      );
 
-                <div style={{ flex: 1, padding: '40px 20px', backgroundColor: '#e8f5e9', borderRadius: '12px', textAlign: 'center', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
-                    <i className="fa-solid fa-boxes-stacked" style={{ fontSize: '40px', color: '#2e7d32', marginBottom: '15px' }}></i>
-                    <h3 style={{ color: '#555' }}>Đơn Hàng</h3>
-                    <p style={{ fontSize: '48px', fontWeight: 'bold', color: '#2e7d32', marginTop: '10px' }}>{stats.orders}</p>
-                </div>
+      const deliveredOrders = orders.filter(
+        (order) => order.status === "Đã giao hàng"
+      );
 
-                <div style={{ flex: 1, padding: '40px 20px', backgroundColor: '#fff3e0', borderRadius: '12px', textAlign: 'center', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
-                    <i className="fa-solid fa-users" style={{ fontSize: '40px', color: '#ef6c00', marginBottom: '15px' }}></i>
-                    <h3 style={{ color: '#555' }}>Khách Hàng</h3>
-                    <p style={{ fontSize: '48px', fontWeight: 'bold', color: '#ef6c00', marginTop: '10px' }}>{stats.users}</p>
-                </div>
-            </div>
+      setStats({
+        products: products.length,
+        orders: orders.length,
+        customers: users.filter((u) => u.role === "CUSTOMER").length,
+        categories: activeCategories.length,
+        brands: activeBrands.length,
+        revenue: deliveredOrders.reduce(
+          (sum, order) => sum + Number(order.totalPrice || 0),
+          0
+        ),
+        pendingOrders: orders.filter((o) => o.status === "Đang xử lý").length,
+        lowStock: products.filter((p) => p.stock <= 10).length,
+      });
+    };
+
+    loadData();
+  }, []);
+
+  return (
+    <main className="dashboard-page">
+      <div className="dashboard-header">
+        <h1>Admin Dashboard</h1>
+        <p>Tổng quan hoạt động cửa hàng ProBuild PC</p>
+      </div>
+
+      <section className="dashboard-grid">
+        <Link to="/admin/products" className="dashboard-card blue">
+          <span>📦</span>
+          <h3>Sản phẩm</h3>
+          <strong>{stats.products}</strong>
+        </Link>
+
+        <Link to="/admin/orders" className="dashboard-card green">
+          <span>🧾</span>
+          <h3>Đơn hàng</h3>
+          <strong>{stats.orders}</strong>
+        </Link>
+
+        <Link to="/admin/categories" className="dashboard-card purple">
+          <span>🗂️</span>
+          <h3>Danh mục</h3>
+          <strong>{stats.categories}</strong>
+        </Link>
+
+        <Link to="/admin/brands" className="dashboard-card red">
+          <span>🏷️</span>
+          <h3>Thương hiệu</h3>
+          <strong>{stats.brands}</strong>
+        </Link>
+
+        <div className="dashboard-card yellow">
+          <span>💰</span>
+          <h3>Doanh thu</h3>
+          <strong>{stats.revenue.toLocaleString("vi-VN")}đ</strong>
         </div>
-    );
+
+        <div className="dashboard-card pink">
+          <span>⏳</span>
+          <h3>Đơn cần xử lý</h3>
+          <strong>{stats.pendingOrders}</strong>
+        </div>
+      </section>
+    </main>
+  );
 }
