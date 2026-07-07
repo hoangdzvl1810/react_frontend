@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { createItem, updateItem } from "../services/api";
 export default function Checkout() {
   const [cart, setCart] = useState([]);
@@ -7,9 +7,15 @@ export default function Checkout() {
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isBuyNow = searchParams.get("type") === "buy-now";
 
   useEffect(() => {
-    const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
+    const storedCart = isBuyNow
+      ? JSON.parse(localStorage.getItem("buyNowCart")) || []
+      : JSON.parse(localStorage.getItem("cart")) || [];
+
+    setCart(storedCart);
     const storedUser = JSON.parse(localStorage.getItem("account"));
 
     setCart(storedCart);
@@ -53,8 +59,12 @@ export default function Checkout() {
         });
       }
 
-      localStorage.removeItem("cart");
-      window.dispatchEvent(new Event("cartUpdated"));
+      if (isBuyNow) {
+        localStorage.removeItem("buyNowCart");
+      } else {
+        localStorage.removeItem("cart");
+        window.dispatchEvent(new Event("cartUpdated"));
+      }
 
       alert("Đặt hàng thành công!");
       navigate("/order-history");
@@ -132,6 +142,49 @@ export default function Checkout() {
             />
           </div>
 
+          <div style={{ marginTop: "10px" }}>
+            <h3 style={{ marginBottom: "12px" }}>Sản phẩm đặt mua</h3>
+
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                marginBottom: "20px",
+              }}
+            >
+              <thead>
+                <tr
+                  style={{
+                    borderBottom: "2px solid #eee",
+                    textAlign: "left",
+                  }}
+                >
+                  <th style={{ padding: "10px" }}>Sản phẩm</th>
+                  <th>Đơn giá</th>
+                  <th>Số lượng</th>
+                  <th>Thành tiền</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {cart.map((item) => (
+                  <tr key={item.id} style={{ borderBottom: "1px solid #eee" }}>
+                    <td style={{ padding: "10px", fontWeight: "600" }}>
+                      {item.name}
+                    </td>
+
+                    <td>{item.price.toLocaleString("vi-VN")}đ</td>
+
+                    <td>{item.quantity}</td>
+
+                    <td style={{ color: "#ed1c24", fontWeight: "bold" }}>
+                      {(item.price * item.quantity).toLocaleString("vi-VN")}đ
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           <div
             style={{
               borderTop: "2px solid #eee",

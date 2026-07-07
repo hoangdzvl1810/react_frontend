@@ -137,19 +137,7 @@ export default function Cart() {
                       gap: "15px",
                     }}
                   >
-                    <img
-                      src={`/assets/images/${item.image}`}
-                      alt={item.name}
-                      style={{
-                        width: "60px",
-                        height: "60px",
-                        objectFit: "contain",
-                      }}
-                      onError={(e) =>
-                        (e.target.src = "https://via.placeholder.com/60")
-                      }
-                    />
-
+                   
                     <Link
                       to={`/product-detail/${item.id}`}
                       style={{
