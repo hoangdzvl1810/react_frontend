@@ -1247,7 +1247,8 @@ body:not(.home-page):not(.dashboard-body):not(.profile-body):not(.cart-page):not
 }
 
 body.login-page,
-body.register-page {
+body.register-page,
+body.forgot-password-page {
     min-height: 100vh;
     margin: 0;
     padding: 0;

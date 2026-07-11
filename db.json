@@ -217,7 +217,7 @@
       "id": 9,
       "name": "Intel Core i9-13900K",
       "price": 14900000,
-      "stock": 15,
+      "stock": 4,
       "categoryId": 1,
       "brandId": 4,
       "image": "intel-core-i9-13900k.jpg",
@@ -601,6 +601,30 @@
         }
       ],
       "id": 4
+    },
+    {
+      "userId": 5,
+      "customerName": "Phạm Thu Trang",
+      "address": "111",
+      "phone": "1111",
+      "totalPrice": 163900000,
+      "status": "Đã giao hàng",
+      "date": "2026-07-07T08:41:39.887Z",
+      "items": [
+        {
+          "id": 9,
+          "name": "Intel Core i9-13900K",
+          "price": 14900000,
+          "stock": 15,
+          "categoryId": 1,
+          "brandId": 4,
+          "image": "intel-core-i9-13900k.jpg",
+          "description": "Intel Core i9-13900K là bộ vi xử lý cao cấp dành cho đa nhiệm nặng, dựng hình và chơi game tần số quét cao.",
+          "status": "ACTIVE",
+          "quantity": 11
+        }
+      ],
+      "id": 5
     }
   ],
   "cart": []

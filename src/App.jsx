@@ -3,6 +3,7 @@ import Layout from './components/Layout';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
 import Categories from './pages/Categories';
 import Brands from './pages/Brands';
 import ProductDetail from './pages/ProductDetail';
@@ -30,6 +31,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
