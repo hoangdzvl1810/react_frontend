@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { createItem, getCollection } from "../services/api";
+import emailjs from '@emailjs/browser';
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -14,11 +15,12 @@ export default function Register() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  
+
   // OTP States
   const [step, setStep] = useState("REGISTER"); // "REGISTER" or "OTP"
   const [otp, setOtp] = useState("");
   const [generatedOtp, setGeneratedOtp] = useState("");
+  const [otpExpiredTime, setOtpExpiredTime] = useState(null);
 
   const navigate = useNavigate();
 
@@ -89,10 +91,28 @@ export default function Register() {
       // Tự động tạo OTP 6 số
       const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
       setGeneratedOtp(newOtp);
-      
-      // Giả lập việc gửi email (Trong React frontend không có backend thật, ta sẽ dùng alert/console)
-      alert("Mô phỏng gửi Email OTP: Mã OTP của bạn là " + newOtp);
-      
+      setOtpExpiredTime(Date.now() + 2 * 60 * 1000); // Mã có hiệu lực trong vòng 2 phút
+
+      // Gửi email qua EmailJS
+      const templateParams = {
+        to_email: email,
+        to_name: form.fullName.trim(),
+        otp_code: newOtp,
+      };
+
+      try {
+        await emailjs.send(
+          'service_8vqxkne', // TODO: Thay thế bằng Service ID của bạn từ EmailJS
+          'template_cwrgi0w', // TODO: Thay thế bằng Template ID của bạn từ EmailJS
+          templateParams,
+          '5AT0YF71xdtAJ2wsE' // TODO: Thay thế bằng Public Key của bạn từ EmailJS
+        );
+        console.log("Đã gửi email OTP thành công qua EmailJS");
+      } catch (emailError) {
+        console.error("Lỗi khi gửi email:", emailError);
+        console.error("CHI TIẾT LỖI TỪ EMAILJS:", emailError?.text || emailError?.message || emailError);
+      }
+
       setSuccess("Mã OTP đã được gửi đến email của bạn.");
       setStep("OTP");
     } catch (err) {
@@ -105,6 +125,11 @@ export default function Register() {
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     setError("");
+
+    if (Date.now() > otpExpiredTime) {
+      setError("Mã OTP đã hết hạn (quá 2 phút). Vui lòng tải lại trang và đăng ký lại.");
+      return;
+    }
 
     if (otp !== generatedOtp) {
       setError("Mã OTP không chính xác.");
@@ -149,7 +174,7 @@ export default function Register() {
           <div className="auth-logo">P</div>
           <h1>{step === "REGISTER" ? "Tạo tài khoản" : "Xác nhận OTP"}</h1>
           <p>
-            {step === "REGISTER" 
+            {step === "REGISTER"
               ? "Đăng ký để đặt hàng, theo dõi đơn và lưu giỏ hàng của bạn."
               : "Vui lòng nhập mã OTP 6 số vừa được gửi đến email của bạn."}
           </p>
@@ -274,10 +299,10 @@ export default function Register() {
             <button type="submit" className="auth-submit" disabled={submitting}>
               {submitting ? "Đang xác nhận..." : "Xác nhận OTP"}
             </button>
-            <button 
-              type="button" 
-              className="auth-submit" 
-              style={{marginTop: "10px", backgroundColor: "#6c757d"}}
+            <button
+              type="button"
+              className="auth-submit"
+              style={{ marginTop: "10px", backgroundColor: "#6c757d" }}
               onClick={() => {
                 setStep("REGISTER");
                 setSuccess("");
