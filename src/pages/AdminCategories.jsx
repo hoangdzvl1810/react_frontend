@@ -38,8 +38,6 @@ export default function AdminCategories() {
 
       if (sort === "productAsc") return countA - countB;
       if (sort === "productDesc") return countB - countA;
-      if (sort === "nameAsc") return a.name.localeCompare(b.name);
-      if (sort === "nameDesc") return b.name.localeCompare(a.name);
 
       return a.id - b.id;
     });
@@ -185,8 +183,6 @@ export default function AdminCategories() {
             <option value="">Sắp xếp mặc định</option>
             <option value="productDesc">Nhiều mặt hàng nhất</option>
             <option value="productAsc">Ít mặt hàng nhất</option>
-            <option value="nameAsc">Tên A-Z</option>
-            <option value="nameDesc">Tên Z-A</option>
           </select>
 
           <button
