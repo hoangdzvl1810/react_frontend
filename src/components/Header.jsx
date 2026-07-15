@@ -115,8 +115,8 @@ export default function Header() {
       </nav>
 
       <div className="header-bottom">
-        <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
-          <div className="logo-box">
+        {roleName === "ADMIN" ? (
+          <div className="logo-box" style={{ cursor: "default" }}>
             <div className="logo-icon">P</div>
             <div>
               <h2>
@@ -125,7 +125,19 @@ export default function Header() {
               <p>BUILD YOUR PERFECT PC</p>
             </div>
           </div>
-        </Link>
+        ) : (
+          <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
+            <div className="logo-box">
+              <div className="logo-icon">P</div>
+              <div>
+                <h2>
+                  ProBuild <span>PC</span>
+                </h2>
+                <p>BUILD YOUR PERFECT PC</p>
+              </div>
+            </div>
+          </Link>
+        )}
 
         {roleName !== "ADMIN" && (
           <form className="search-box" action="/categories" method="get">
