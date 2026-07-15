@@ -1,12 +1,13 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { getStoredAccount, readCart } from "../utils/cartStorage";
 
 export default function Header() {
   const [account, setAccount] = useState(null);
   const [cartCount, setCartCount] = useState(0);
   useEffect(() => {
     const updateAccount = () => {
-      const storedAccount = JSON.parse(localStorage.getItem("account"));
+      const storedAccount = getStoredAccount();
       setAccount(storedAccount);
     };
 
@@ -22,14 +23,14 @@ export default function Header() {
   }, []);
   useEffect(() => {
     const updateCartCount = () => {
-      const storedAccount = JSON.parse(localStorage.getItem("account"));
+      const storedAccount = getStoredAccount();
 
       if (!storedAccount) {
         setCartCount(0);
         return;
       }
 
-      const cart = JSON.parse(localStorage.getItem("cart")) || [];
+      const cart = readCart();
       const total = cart.reduce(
         (sum, item) => sum + Number(item.quantity || 0),
         0,
@@ -56,7 +57,6 @@ export default function Header() {
 
   const roleName = account?.role || "CUSTOMER";
   const fullName = account?.fullName || "";
-  const cartItemCount = cartCount;
   return (
     <header className="main-header">
       <div className="header-top-line"></div>
@@ -115,8 +115,8 @@ export default function Header() {
       </nav>
 
       <div className="header-bottom">
-        <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
-          <div className="logo-box">
+        {roleName === "ADMIN" ? (
+          <div className="logo-box" style={{ cursor: "default" }}>
             <div className="logo-icon">P</div>
             <div>
               <h2>
@@ -125,8 +125,19 @@ export default function Header() {
               <p>BUILD YOUR PERFECT PC</p>
             </div>
           </div>
-        </Link>
-
+        ) : (
+          <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
+            <div className="logo-box">
+              <div className="logo-icon">P</div>
+              <div>
+                <h2>
+                  ProBuild <span>PC</span>
+                </h2>
+                <p>BUILD YOUR PERFECT PC</p>
+              </div>
+            </div>
+          </Link>
+        )}
         {roleName !== "ADMIN" && (
           <form className="search-box" action="/categories" method="get">
             <input
@@ -167,9 +178,13 @@ export default function Header() {
                 <Link to="/profile">
                   <i className="fa-regular fa-id-card"></i> Thông tin cá nhân
                 </Link>
-                <a href="#" onClick={handleLogout} className="menu-item logout">
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="menu-item logout"
+                >
                   <i className="fa-solid fa-right-from-bracket"></i> Đăng xuất
-                </a>
+                </button>
               </div>
             </div>
           ) : (

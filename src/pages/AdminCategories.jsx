@@ -100,38 +100,6 @@ export default function AdminCategories() {
       ),
     );
   };
-  const addToCart = (product) => {
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-
-    const exist = cart.find((item) => item.id === product.id);
-
-    if (exist) {
-      // Nếu số lượng sau khi cộng vượt tồn khooooooooooooooo89 228 106
-      if (exist.quantity + 1 > product.stock) {
-        alert(
-          "Không thể thêm sản phẩm! Số lượng trong giỏ đã bằng số lượng tồn kho.",
-        );
-        return;
-      }
-
-      exist.quantity += 1;
-    } else {
-      if (product.stock <= 0) {
-        alert("Sản phẩm đã hết hàng.");
-        return;
-      }
-
-      cart.push({
-        ...product,
-        quantity: 1,
-      });
-    }
-
-    localStorage.setItem("cart", JSON.stringify(cart));
-
-    alert("Đã thêm sản phẩm vào giỏ hàng!");
-  };
-
   return (
     <div
       style={{
