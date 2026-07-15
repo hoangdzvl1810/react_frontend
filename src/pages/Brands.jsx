@@ -168,7 +168,6 @@ export default function Brands() {
           <div className="filter-panel">
             <div className="filter-title">
               <h2>Khoảng giá</h2>
-              <span>+</span>
             </div>
 
             <label className={!priceRange ? "is-checked" : ""}>
@@ -220,8 +219,7 @@ export default function Brands() {
               className={`brand-card view-all ${!brandId ? "active" : ""}`}
               to="/brands"
             >
-              <span>+</span>
-              <small>Tất cả</small>
+              <span style={{color:"blue"}}><b>Tất cả</b></span> 
             </Link>
 
             {brands.map((brand) => (
