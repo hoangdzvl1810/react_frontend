@@ -34,7 +34,11 @@ export default function Login() {
       moveGuestCartToUser(user.id);
       localStorage.setItem("account", JSON.stringify(user));
       window.dispatchEvent(new Event("accountUpdated"));
-      window.location.href = "/";
+      if (user.role === "ADMIN") {
+        window.location.href = "/dashboard";
+      } else {
+        window.location.href = "/";
+      }
     } else {
       setError("Tài khoản hoặc mật khẩu không chính xác!");
     }

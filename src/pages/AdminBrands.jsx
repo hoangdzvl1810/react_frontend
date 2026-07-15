@@ -45,13 +45,24 @@ export default function AdminBrands() {
   const handleAddBrand = async (e) => {
     e.preventDefault();
 
-    if (name.trim() === "") {
+    const trimmedName = name.trim();
+
+    if (trimmedName === "") {
       alert("Tên thương hiệu không được để trống!");
       return;
     }
 
+    const isDuplicate = brands.some(
+      (b) => b.name.trim().toLowerCase() === trimmedName.toLowerCase()
+    );
+
+    if (isDuplicate) {
+      alert("Tên thương hiệu đã tồn tại trong hệ thống!");
+      return;
+    }
+
     const createdBrand = await createItem("brands", {
-      name: name.trim(),
+      name: trimmedName,
       status: "ACTIVE",
     });
 
@@ -67,15 +78,26 @@ export default function AdminBrands() {
 
     if (newName === null) return;
 
-    if (newName.trim() === "") {
+    const trimmedNewName = newName.trim();
+
+    if (trimmedNewName === "") {
       alert("Tên thương hiệu không được để trống!");
       return;
     }
 
-    if (newName.trim() === brand.name) return;
+    if (trimmedNewName === brand.name) return;
+
+    const isDuplicate = brands.some(
+      (b) => b.id !== brand.id && b.name.trim().toLowerCase() === trimmedNewName.toLowerCase()
+    );
+
+    if (isDuplicate) {
+      alert("Tên thương hiệu này đã tồn tại trong hệ thống!");
+      return;
+    }
 
     const updatedBrand = await updateItem("brands", brand.id, {
-      name: newName.trim(),
+      name: trimmedNewName,
     });
 
     setBrands(
