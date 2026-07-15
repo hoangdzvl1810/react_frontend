@@ -8,8 +8,6 @@ const SORT_OPTIONS = {
   default: "Mặc định",
   priceAsc: "Giá thấp đến cao",
   priceDesc: "Giá cao đến thấp",
-  nameAsc: "Tên A-Z",
-  nameDesc: "Tên Z-A",
 };
 
 const logoFileName = (brandName) => `${brandName.toLowerCase()}.png`;
@@ -100,8 +98,6 @@ export default function Brands() {
     result = [...result].sort((a, b) => {
       if (sort === "priceAsc") return a.price - b.price;
       if (sort === "priceDesc") return b.price - a.price;
-      if (sort === "nameAsc") return a.name.localeCompare(b.name);
-      if (sort === "nameDesc") return b.name.localeCompare(a.name);
       return a.id - b.id;
     });
 
