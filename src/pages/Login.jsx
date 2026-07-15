@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getCollection } from "../services/api";
+import { moveGuestCartToUser } from "../utils/cartStorage";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -30,6 +31,7 @@ export default function Login() {
     console.log("user tìm thấy:", user);
 
     if (user) {
+      moveGuestCartToUser(user.id);
       localStorage.setItem("account", JSON.stringify(user));
       window.dispatchEvent(new Event("accountUpdated"));
       window.location.href = "/";

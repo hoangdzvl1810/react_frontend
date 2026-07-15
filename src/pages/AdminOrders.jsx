@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getCollection, updateItem } from "../services/api";
+import { getStoredAccount } from "../utils/cartStorage";
 import "../assets/css/admin-order.css";
 
 const ORDER_STATUSES = [
@@ -9,11 +10,19 @@ const ORDER_STATUSES = [
   "Đã hủy",
 ];
 
+const ALLOWED_TRANSITIONS = {
+  "Đang xử lý": ["Đang giao hàng", "Đã hủy"],
+  "Đang giao hàng": ["Đã giao hàng"],
+  "Đã giao hàng": [],
+  "Đã hủy": [],
+};
+
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [keyword, setKeyword] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [users, setUsers] = useState([]);
+  const [updatingOrderIds, setUpdatingOrderIds] = useState([]);
   useEffect(() => {
     loadOrders();
   }, []);
@@ -29,34 +38,82 @@ export default function AdminOrders() {
   const formatPrice = (price) => Number(price).toLocaleString("vi-VN") + "đ";
 
   const getCustomerName = (userId) => {
-    const user = users.find((item) => item.id === userId);
+    const user = users.find((item) => Number(item.id) === Number(userId));
     return user ? user.fullName : `Không tìm thấy tài khoản`;
   };
   const handleChangeStatus = async (order, status) => {
-    // Nếu đơn chuyển sang Đã hủy thì cộng lại tồn kho
-    if (status === "Đã hủy" && order.status !== "Đã hủy") {
-      const products = await getCollection("products");
+    if (status === order.status) return;
+    if (!(ALLOWED_TRANSITIONS[order.status] || []).includes(status)) {
+      alert("Không thể chuyển sang trạng thái này!");
+      return;
+    }
+    if (updatingOrderIds.includes(order.id)) return;
 
-      for (const orderItem of order.items) {
-        const product = products.find((p) => p.id === orderItem.id);
+    setUpdatingOrderIds((current) => [...current, order.id]);
+    const adjustedProducts = [];
 
-        if (product) {
+    try {
+      if (status === "Đã hủy" && !order.stockRestored) {
+        const products = await getCollection("products");
+
+        for (const orderItem of order.items || []) {
+          const productId = Number(orderItem.productId ?? orderItem.id);
+          const quantity = Number(orderItem.quantity);
+          const product = products.find(
+            (item) => Number(item.id) === productId,
+          );
+
+          if (!product || !Number.isInteger(quantity) || quantity <= 0) {
+            throw new Error("Dữ liệu sản phẩm trong đơn hàng không hợp lệ.");
+          }
+
+          const originalStock = Number(product.stock);
           await updateItem("products", product.id, {
-            stock: Number(product.stock) + Number(orderItem.quantity),
+            stock: originalStock + quantity,
           });
+          adjustedProducts.push({ id: product.id, stock: originalStock });
         }
       }
+
+      const now = new Date().toISOString();
+      const currentAdmin = getStoredAccount();
+      const updatedOrder = await updateItem("orders", order.id, {
+        status,
+        updatedAt: now,
+        ...(status === "Đã hủy"
+          ? { stockRestored: true, cancelledAt: now }
+          : {}),
+        ...(status === "Đã giao hàng" ? { deliveredAt: now } : {}),
+        statusHistory: [
+          ...(order.statusHistory || []),
+          {
+            status,
+            changedAt: now,
+            changedBy: currentAdmin?.id ?? null,
+          },
+        ],
+      });
+
+      setOrders((current) =>
+        current.map((item) =>
+          item.id === order.id ? { ...item, ...updatedOrder } : item,
+        ),
+      );
+    } catch (err) {
+      console.error(err);
+      if (adjustedProducts.length) {
+        await Promise.allSettled(
+          adjustedProducts.map((product) =>
+            updateItem("products", product.id, { stock: product.stock }),
+          ),
+        );
+      }
+      alert(err.message || "Không thể cập nhật trạng thái đơn hàng.");
+    } finally {
+      setUpdatingOrderIds((current) =>
+        current.filter((id) => id !== order.id),
+      );
     }
-
-    const updatedOrder = await updateItem("orders", order.id, {
-      status,
-    });
-
-    setOrders(
-      orders.map((item) =>
-        item.id === order.id ? { ...item, ...updatedOrder } : item,
-      ),
-    );
   };
   const filteredOrders = orders.filter((order) => {
     const matchId =
@@ -138,16 +195,17 @@ export default function AdminOrders() {
                 <td className="admin-order-items ">
                   {order.items?.map((item) => (
                     <div
-                      key={item.id}
+                      key={item.productId ?? item.id}
                       className="admin-order-product"
                       style={{ marginTop: "5px" }}
                     >
-                      <strong>{item.name}</strong>
+                      <strong>{item.productName ?? item.name}</strong>
                       <br />
-                      <span>Số lượng: {item.stock}</span>
+                      <span>Số lượng: {item.quantity}</span>
                       <br />
                       <span>
-                        Giá tiền 1 sản phẩm: {formatPrice(item.price)}
+                        Giá tiền 1 sản phẩm:{" "}
+                        {formatPrice(item.unitPrice ?? item.price)}
                       </span>
                     </div>
                   ))}
@@ -160,8 +218,13 @@ export default function AdminOrders() {
                     className="admin-status-select"
                     value={order.status}
                     onChange={(e) => handleChangeStatus(order, e.target.value)}
+                    disabled={updatingOrderIds.includes(order.id)}
                   >
-                    {ORDER_STATUSES.map((status) => (
+                    {ORDER_STATUSES.filter(
+                      (status) =>
+                        status === order.status ||
+                        (ALLOWED_TRANSITIONS[order.status] || []).includes(status),
+                    ).map((status) => (
                       <option value={status} key={status}>
                         {status}
                       </option>
