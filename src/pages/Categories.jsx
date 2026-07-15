@@ -26,8 +26,10 @@ export default function Categories() {
       try {
         setLoading(true);
 
-        const categoriesData = await getCollection("categories");
-        const productsData = await getCollection("products");
+        const [categoriesData, productsData] = await Promise.all([
+          getCollection("categories"),
+          getCollection("products"),
+        ]);
 
         const activeCategories = categoriesData.filter(
           (category) => category.status !== "INACTIVE",
@@ -150,13 +152,7 @@ export default function Categories() {
       </nav>
 
       <header className="category-heading">
-        <div>
-          <h1>{heading}</h1>
-          <p>
-            {priceRange ? `Khoảng giá ${priceRange} · ` : ""}
-            {filteredProducts.length} sản phẩm phù hợp
-          </p>
-        </div>
+        <h1>{heading}</h1>
       </header>
 
       <div className="category-layout">
@@ -164,7 +160,6 @@ export default function Categories() {
           <div className="filter-panel">
             <div className="filter-title">
               <h2>Danh mục</h2>
-              <span>+</span>
             </div>
 
             <label className={!categoryId ? "is-checked" : ""}>
@@ -202,7 +197,6 @@ export default function Categories() {
           <div className="filter-panel">
             <div className="filter-title">
               <h2>Khoảng giá</h2>
-              <span>+</span>
             </div>
 
             <label className={!priceRange ? "is-checked" : ""}>

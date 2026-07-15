@@ -129,7 +129,7 @@
       "id": 1,
       "name": "AMD Ryzen 5 7600",
       "price": 5500000,
-      "stock": 20,
+      "stock": 19,
       "categoryId": 1,
       "brandId": 1,
       "image": "amd-ryzen-5-7600.jpg",
@@ -641,6 +641,36 @@
         }
       ],
       "id": 5
+    },
+    {
+      "userId": 6,
+      "customerName": "Đào Duy Hiếu - HE191090",
+      "address": "hoa lac thach taht ha noi",
+      "phone": "0982270847",
+      "totalPrice": 5500000,
+      "status": "Đang xử lý",
+      "paymentMethod": "BANK_TRANSFER",
+      "paymentStatus": "Chờ thanh toán",
+      "stockRestored": false,
+      "date": "2026-07-15T15:24:36.657Z",
+      "updatedAt": "2026-07-15T15:24:36.657Z",
+      "statusHistory": [
+        {
+          "status": "Đang xử lý",
+          "changedAt": "2026-07-15T15:24:36.657Z",
+          "changedBy": 6
+        }
+      ],
+      "items": [
+        {
+          "productId": 1,
+          "productName": "AMD Ryzen 5 7600",
+          "unitPrice": 5500000,
+          "quantity": 1,
+          "lineTotal": 5500000
+        }
+      ],
+      "id": 6
     }
   ],
   "cart": []

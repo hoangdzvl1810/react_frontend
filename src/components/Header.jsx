@@ -138,7 +138,6 @@ export default function Header() {
             </div>
           </Link>
         )}
-
         {roleName !== "ADMIN" && (
           <form className="search-box" action="/categories" method="get">
             <input
