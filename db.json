@@ -7,126 +7,126 @@
       "rating": 5,
       "comment": "ok",
       "date": "2026-07-07T08:37:52.234Z",
-      "id": 1
+      "id": "1"
     }
   ],
   "categories": [
     {
-      "id": 1,
+      "id": "1",
       "name": "Bộ vi xử lý",
       "status": "ACTIVE"
     },
     {
-      "id": 2,
+      "id": "2",
       "name": "Bo mạch chủ",
       "status": "ACTIVE"
     },
     {
-      "id": 3,
+      "id": "3",
       "name": "Bộ nhớ RAM",
       "status": "ACTIVE"
     },
     {
-      "id": 4,
+      "id": "4",
       "name": "Card đồ họa",
       "status": "ACTIVE"
     },
     {
-      "id": 5,
+      "id": "5",
       "name": "Ổ cứng SSD",
       "status": "ACTIVE"
     },
     {
-      "id": 6,
+      "id": "6",
       "name": "Nguồn máy tính",
       "status": "ACTIVE"
     },
     {
-      "id": 7,
+      "id": "7",
       "name": "Vỏ máy tính",
       "status": "ACTIVE"
     },
     {
-      "id": 8,
+      "id": "8",
       "name": "Màn hình",
       "status": "ACTIVE"
     },
     {
-      "id": 9,
+      "id": "9",
       "name": "Bàn phím",
       "status": "ACTIVE"
     },
     {
-      "id": 10,
+      "id": "10",
       "name": "Chuột",
       "status": "ACTIVE"
     }
   ],
   "brands": [
     {
-      "id": 1,
+      "id": "1",
       "name": "AMD",
       "status": "ACTIVE"
     },
     {
-      "id": 2,
+      "id": "2",
       "name": "ASUS",
       "status": "ACTIVE"
     },
     {
-      "id": 3,
+      "id": "3",
       "name": "Gigabyte",
       "status": "ACTIVE"
     },
     {
-      "id": 4,
+      "id": "4",
       "name": "Intel",
       "status": "ACTIVE"
     },
     {
-      "id": 5,
+      "id": "5",
       "name": "Kingston",
       "status": "ACTIVE"
     },
     {
-      "id": 6,
+      "id": "6",
       "name": "MSI",
       "status": "ACTIVE"
     },
     {
-      "id": 7,
+      "id": "7",
       "name": "Corsair",
       "status": "ACTIVE"
     },
     {
-      "id": 8,
+      "id": "8",
       "name": "Samsung",
       "status": "ACTIVE"
     },
     {
-      "id": 9,
+      "id": "9",
       "name": "Dell",
       "status": "ACTIVE"
     },
     {
-      "id": 10,
+      "id": "10",
       "name": "Logitech",
       "status": "ACTIVE"
     },
     {
-      "id": 11,
+      "id": "11",
       "name": "Razer",
       "status": "ACTIVE"
     },
     {
-      "id": 12,
+      "id": "12",
       "name": "NZXT",
       "status": "ACTIVE"
     }
   ],
   "products": [
     {
-      "id": 1,
+      "id": "1",
       "name": "AMD Ryzen 5 7600",
       "price": 5500000,
       "stock": 19,
@@ -137,7 +137,7 @@
       "status": "ACTIVE"
     },
     {
-      "id": 2,
+      "id": "2",
       "name": "AMD Ryzen 7 7700X",
       "price": 8500000,
       "stock": 36,
@@ -148,7 +148,7 @@
       "status": "ACTIVE"
     },
     {
-      "id": 3,
+      "id": "3",
       "name": "Intel Core i5-12400F",
       "price": 4200000,
       "stock": 46,
@@ -159,7 +159,7 @@
       "status": "ACTIVE"
     },
     {
-      "id": 4,
+      "id": "4",
       "name": "ASUS PRIME B650M-A",
       "price": 3800000,
       "stock": 43,
@@ -170,7 +170,7 @@
       "status": "ACTIVE"
     },
     {
-      "id": 5,
+      "id": "5",
       "name": "Kingston Fury Beast 16GB DDR5",
       "price": 1500000,
       "stock": 31,
@@ -181,7 +181,7 @@
       "status": "ACTIVE"
     },
     {
-      "id": 6,
+      "id": "6",
       "name": "MSI GeForce RTX 4060 Ventus 2X",
       "price": 9500000,
       "stock": 46,
@@ -192,7 +192,7 @@
       "status": "ACTIVE"
     },
     {
-      "id": 7,
+      "id": "7",
       "name": "AMD Ryzen 9 7900X",
       "price": 11900000,
       "stock": 46,
@@ -203,7 +203,7 @@
       "status": "ACTIVE"
     },
     {
-      "id": 8,
+      "id": "8",
       "name": "Intel Core i7-13700K",
       "price": 10500000,
       "stock": 20,
@@ -214,7 +214,7 @@
       "status": "ACTIVE"
     },
     {
-      "id": 9,
+      "id": "9",
       "name": "Intel Core i9-13900K",
       "price": 14900000,
       "stock": 4,
@@ -225,7 +225,7 @@
       "status": "ACTIVE"
     },
     {
-      "id": 10,
+      "id": "10",
       "name": "ASUS ROG STRIX B650-A GAMING WIFI",
       "price": 5900000,
       "stock": 38,
@@ -236,7 +236,7 @@
       "status": "ACTIVE"
     },
     {
-      "id": 11,
+      "id": "11",
       "name": "ASUS TUF GAMING B760M-PLUS WIFI",
       "price": 4700000,
       "stock": 40,
@@ -247,7 +247,7 @@
       "status": "ACTIVE"
     },
     {
-      "id": 12,
+      "id": "12",
       "name": "Gigabyte B760M DS3H DDR5",
       "price": 3200000,
       "stock": 51,
@@ -258,7 +258,7 @@
       "status": "ACTIVE"
     },
     {
-      "id": 13,
+      "id": "13",
       "name": "Gigabyte B650 Gaming X AX",
       "price": 5200000,
       "stock": 40,
@@ -269,7 +269,7 @@
       "status": "ACTIVE"
     },
     {
-      "id": 14,
+      "id": "14",
       "name": "Kingston Fury Beast 32GB DDR5",
       "price": 2800000,
       "stock": 54,
@@ -280,7 +280,7 @@
       "status": "ACTIVE"
     },
     {
-      "id": 15,
+      "id": "15",
       "name": "Kingston Fury Beast 64GB DDR5",
       "price": 5900000,
       "stock": 45,
@@ -291,7 +291,7 @@
       "status": "ACTIVE"
     },
     {
-      "id": 16,
+      "id": "16",
       "name": "MSI RTX 4070 Ventus 3X",
       "price": 16500000,
       "stock": 28,
@@ -302,7 +302,7 @@
       "status": "ACTIVE"
     },
     {
-      "id": 17,
+      "id": "17",
       "name": "MSI RTX 4070 Ti Gaming X Trio",
       "price": 21900000,
       "stock": 29,
@@ -313,7 +313,7 @@
       "status": "ACTIVE"
     },
     {
-      "id": 18,
+      "id": "18",
       "name": "MSI RTX 4080 Super Gaming X Trio",
       "price": 32900000,
       "stock": 46,
@@ -324,7 +324,7 @@
       "status": "ACTIVE"
     },
     {
-      "id": 19,
+      "id": "19",
       "name": "Samsung 980 Pro 1TB",
       "price": 2300000,
       "stock": 43,
@@ -335,7 +335,7 @@
       "status": "ACTIVE"
     },
     {
-      "id": 20,
+      "id": "20",
       "name": "Kingston NV2 500GB",
       "price": 950000,
       "stock": 12,
@@ -346,7 +346,7 @@
       "status": "ACTIVE"
     },
     {
-      "id": 21,
+      "id": "21",
       "name": "Corsair RM850x 850W",
       "price": 3500000,
       "stock": 50,
@@ -357,7 +357,7 @@
       "status": "ACTIVE"
     },
     {
-      "id": 22,
+      "id": "22",
       "name": "Gigabyte P650B 650W",
       "price": 1200000,
       "stock": 24,
@@ -368,7 +368,7 @@
       "status": "ACTIVE"
     },
     {
-      "id": 23,
+      "id": "23",
       "name": "Corsair 4000D Airflow",
       "price": 1900000,
       "stock": 38,
@@ -379,7 +379,7 @@
       "status": "ACTIVE"
     },
     {
-      "id": 24,
+      "id": "24",
       "name": "NZXT H510",
       "price": 1800000,
       "stock": 43,
@@ -390,7 +390,7 @@
       "status": "ACTIVE"
     },
     {
-      "id": 25,
+      "id": "25",
       "name": "Dell UltraSharp U2720Q",
       "price": 12500000,
       "stock": 20,
@@ -401,7 +401,7 @@
       "status": "ACTIVE"
     },
     {
-      "id": 26,
+      "id": "26",
       "name": "ASUS TUF Gaming VG27AQ",
       "price": 7500000,
       "stock": 52,
@@ -412,7 +412,7 @@
       "status": "ACTIVE"
     },
     {
-      "id": 27,
+      "id": "27",
       "name": "Logitech G Pro X Keyboard",
       "price": 3200000,
       "stock": 23,
@@ -423,7 +423,7 @@
       "status": "ACTIVE"
     },
     {
-      "id": 28,
+      "id": "28",
       "name": "Logitech G502 Hero",
       "price": 1100000,
       "stock": 10,
@@ -434,7 +434,7 @@
       "status": "ACTIVE"
     },
     {
-      "id": 29,
+      "id": "29",
       "name": "Razer DeathAdder V3 Pro",
       "price": 3500000,
       "stock": 56,
@@ -447,35 +447,35 @@
   ],
   "users": [
     {
-      "id": 1,
+      "id": "1",
       "fullName": "Bùi Phúc",
       "email": "nguyenngoccham120705@gmail.com",
       "password": "123",
       "role": "ADMIN"
     },
     {
-      "id": 2,
+      "id": "2",
       "fullName": "Nguyễn Văn Nam",
       "email": "nguyenvannam@gmail.com",
       "password": "123",
       "role": "ADMIN"
     },
     {
-      "id": 3,
+      "id": "3",
       "fullName": "Trần Minh Quân",
       "email": "tranminhquan@gmail.com",
       "password": "123",
       "role": "ADMIN"
     },
     {
-      "id": 4,
+      "id": "4",
       "fullName": "Lê Hoàng Anh",
       "email": "lehoanganh@gmail.com",
       "password": "123",
       "role": "CUSTOMER"
     },
     {
-      "id": 5,
+      "id": "5",
       "fullName": "Phạm Thu Trang",
       "email": "phamthutrang@gmail.com",
       "password": "123",
@@ -486,14 +486,28 @@
       "email": "duyh2934@gmail.com",
       "password": "123",
       "role": "CUSTOMER",
-      "id": 6
+      "id": "6"
     },
     {
       "fullName": "hieue 1",
       "email": "amirus2610@gmail.com",
       "password": "123",
       "role": "CUSTOMER",
-      "id": 7
+      "id": "7"
+    },
+    {
+      "fullName": "Cham Nguyen",
+      "email": "chammeof1401@gmail.com",
+      "password": "Cham1234",
+      "role": "CUSTOMER",
+      "id": "UFSlSiNkP5E"
+    },
+    {
+      "fullName": "Cham",
+      "email": "caytaogai958@gmail.com",
+      "password": "Cham1234",
+      "role": "CUSTOMER",
+      "id": "MeakTeU4H3I"
     }
   ],
   "orders": [
@@ -532,7 +546,7 @@
           "quantity": 2
         }
       ],
-      "id": 1
+      "id": "1"
     },
     {
       "userId": 5,
@@ -559,7 +573,7 @@
           "quantity": 43
         }
       ],
-      "id": 2
+      "id": "2"
     },
     {
       "userId": 5,
@@ -586,7 +600,7 @@
           "quantity": 20
         }
       ],
-      "id": 3
+      "id": "3"
     },
     {
       "userId": 5,
@@ -613,7 +627,7 @@
           "quantity": 1
         }
       ],
-      "id": 4
+      "id": "4"
     },
     {
       "userId": 5,
