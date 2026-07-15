@@ -106,7 +106,7 @@ export default function AdminCategories() {
     const exist = cart.find((item) => item.id === product.id);
 
     if (exist) {
-      // Nếu số lượng sau khi cộng vượt tồn khooooooooooooooo89 228
+      // Nếu số lượng sau khi cộng vượt tồn khooooooooooooooo89 228 106
       if (exist.quantity + 1 > product.stock) {
         alert(
           "Không thể thêm sản phẩm! Số lượng trong giỏ đã bằng số lượng tồn kho.",
