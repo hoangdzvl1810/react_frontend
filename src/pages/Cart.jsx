@@ -1,26 +1,58 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { getCollection } from "../services/api";
+import { readCart, writeCart } from "../utils/cartStorage";
 
 export default function Cart() {
   const [cart, setCart] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
-    setCart(storedCart);
+    let active = true;
+
+    const loadCart = async () => {
+      try {
+        const storedCart = readCart();
+        const products = await getCollection("products");
+        const productMap = new Map(
+          products.map((product) => [Number(product.id), product]),
+        );
+        const hydratedCart = storedCart
+          .map((item) => {
+            const product = productMap.get(Number(item.productId));
+            if (!product || product.status === "INACTIVE") return null;
+            return { ...product, quantity: item.quantity };
+          })
+          .filter(Boolean);
+
+        writeCart(hydratedCart);
+        if (active) setCart(hydratedCart);
+      } catch (err) {
+        console.error(err);
+        if (active) setError("Không thể tải giỏ hàng. Vui lòng thử lại.");
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+
+    loadCart();
+    return () => {
+      active = false;
+    };
   }, []);
 
   const saveCart = (newCart) => {
     setCart(newCart);
-    localStorage.setItem("cart", JSON.stringify(newCart));
-    window.dispatchEvent(new Event("cartUpdated"));
+    writeCart(newCart);
   };
 
   const updateQuantity = (id, delta) => {
     const newCart = cart.map((item) => {
       if (item.id === id) {
-        const newQty = item.quantity + delta;
+        const newQty = Number(item.quantity) + delta;
 
-        if (newQty > item.stock) {
+        if (!Number.isInteger(newQty) || newQty > Number(item.stock)) {
           alert("Số lượng đã đạt mức tồn kho tối đa!");
           return item;
         }
@@ -51,9 +83,23 @@ export default function Cart() {
   };
 
   const total = cart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+    (sum, item) => sum + Number(item.price) * Number(item.quantity),
     0
   );
+  const canCheckout = cart.every(
+    (item) =>
+      Number.isInteger(Number(item.quantity)) &&
+      Number(item.quantity) > 0 &&
+      Number(item.quantity) <= Number(item.stock),
+  );
+
+  if (loading) {
+    return <div style={{ padding: "50px", textAlign: "center" }}>Đang tải giỏ hàng...</div>;
+  }
+
+  if (error) {
+    return <div style={{ padding: "50px", textAlign: "center" }}>{error}</div>;
+  }
 
   return (
     <div
@@ -228,18 +274,29 @@ export default function Cart() {
               </span>
             </h3>
 
-            <Link
-              to="/checkout"
-              className="btn-submit"
-              style={{
-                display: "inline-block",
-                width: "250px",
-                textDecoration: "none",
-                textAlign: "center",
-              }}
-            >
-              Tiến hành đặt hàng
-            </Link>
+            {!canCheckout && (
+              <p style={{ color: "#dc3545", marginBottom: "12px" }}>
+                Một số sản phẩm không còn đủ tồn kho. Vui lòng giảm số lượng.
+              </p>
+            )}
+            {canCheckout ? (
+              <Link
+                to="/checkout"
+                className="btn-submit"
+                style={{
+                  display: "inline-block",
+                  width: "250px",
+                  textDecoration: "none",
+                  textAlign: "center",
+                }}
+              >
+                Tiến hành đặt hàng
+              </Link>
+            ) : (
+              <button type="button" className="btn-submit" disabled>
+                Chưa thể đặt hàng
+              </button>
+            )}
           </div>
         </div>
       )}

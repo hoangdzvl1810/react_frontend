@@ -3,13 +3,12 @@ import { Link, useSearchParams } from "react-router-dom";
 import { getCollection } from "../services/api";
 import { getBrandImage } from "../utils/brandImages";
 import { getProductImage } from "../utils/productImages";
+import { addCartItem } from "../utils/cartStorage";
 
 const SORT_OPTIONS = {
   default: "Mặc định",
   priceAsc: "Giá thấp đến cao",
   priceDesc: "Giá cao đến thấp",
-  nameAsc: "Tên A-Z",
-  nameDesc: "Tên Z-A",
 };
 
 const logoFileName = (brandName) => `${brandName.toLowerCase()}.png`;
@@ -100,8 +99,6 @@ export default function Brands() {
     result = [...result].sort((a, b) => {
       if (sort === "priceAsc") return a.price - b.price;
       if (sort === "priceDesc") return b.price - a.price;
-      if (sort === "nameAsc") return a.name.localeCompare(b.name);
-      if (sort === "nameDesc") return b.name.localeCompare(a.name);
       return a.id - b.id;
     });
 
@@ -135,34 +132,17 @@ export default function Brands() {
     ? `Thương hiệu ${selectedBrand.name}`
     : "Thương hiệu sản phẩm";
   const addToCart = (product) => {
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-
-    const exist = cart.find((item) => item.id === product.id);
-
-    if (exist) {
-      // Nếu số lượng sau khi cộng vượt tồn kho
-      if (exist.quantity + 1 > product.stock) {
-        alert(
-          "Không thể thêm sản phẩm! Số lượng trong giỏ đã bằng số lượng tồn kho.",
-        );
-        return;
-      }
-
-      exist.quantity += 1;
-    } else {
-      if (product.stock <= 0) {
-        alert("Sản phẩm đã hết hàng.");
-        return;
-      }
-
-      cart.push({
-        ...product,
-        quantity: 1,
-      });
+    if (product.status === "INACTIVE" || Number(product.stock) <= 0) {
+      alert("Sản phẩm đã hết hàng hoặc ngừng bán.");
+      return;
     }
 
-    localStorage.setItem("cart", JSON.stringify(cart));
-    window.dispatchEvent(new Event("cartUpdated"));
+    const result = addCartItem(product.id, 1, product.stock);
+    if (!result.ok) {
+      alert("Số lượng trong giỏ đã đạt mức tồn kho tối đa.");
+      return;
+    }
+
     alert("Đã thêm sản phẩm vào giỏ hàng!");
   };
 

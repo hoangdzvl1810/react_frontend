@@ -16,6 +16,7 @@ import AdminOrders from "./pages/AdminOrders";
 import AdminCategories from "./pages/AdminCategories";
 import AdminBrands from "./pages/AdminBrands";
 import Profile from "./pages/Profile";
+import ProtectedRoute from "./components/ProtectedRoute";
 // Import CSS
 import './assets/css/style.css';
 import './assets/css/admin-products.css';
@@ -39,15 +40,36 @@ function App() {
           <Route path="brands" element={<Brands />} />
           <Route path="product-detail/:id" element={<ProductDetail />} />
           <Route path="cart" element={<Cart />} />
-          <Route path="checkout" element={<Checkout />} />
-          <Route path="order-history" element={<OrderHistory />} />
-          <Route path="profile" element={<Profile />} />
+          <Route
+            path="checkout"
+            element={
+              <ProtectedRoute allowedRoles={["CUSTOMER"]}>
+                <Checkout />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="order-history"
+            element={
+              <ProtectedRoute allowedRoles={["CUSTOMER"]}>
+                <OrderHistory />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="profile"
+            element={
+              <ProtectedRoute allowedRoles={["CUSTOMER", "ADMIN"]}>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
           {/* Admin Routes */}
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="admin/products" element={<AdminProducts />} />
-          <Route path="admin/orders" element={<AdminOrders />} />
-          <Route path="admin/categories" element={<AdminCategories />} />
-          <Route path="admin/brands" element={<AdminBrands />} />
+          <Route path="dashboard" element={<ProtectedRoute allowedRoles={["ADMIN"]}><Dashboard /></ProtectedRoute>} />
+          <Route path="admin/products" element={<ProtectedRoute allowedRoles={["ADMIN"]}><AdminProducts /></ProtectedRoute>} />
+          <Route path="admin/orders" element={<ProtectedRoute allowedRoles={["ADMIN"]}><AdminOrders /></ProtectedRoute>} />
+          <Route path="admin/categories" element={<ProtectedRoute allowedRoles={["ADMIN"]}><AdminCategories /></ProtectedRoute>} />
+          <Route path="admin/brands" element={<ProtectedRoute allowedRoles={["ADMIN"]}><AdminBrands /></ProtectedRoute>} />
         </Route>
       </Routes>
     </BrowserRouter>

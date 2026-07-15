@@ -148,6 +148,7 @@ export default function Register() {
         role: "CUSTOMER",
       });
 
+      moveGuestCartToUser(newUser.id);
       localStorage.setItem("account", JSON.stringify(newUser));
       setSuccess("Đăng ký thành công! Đang chuyển về trang chủ...");
 

@@ -513,10 +513,14 @@
   "orders": [
     {
       "userId": 6,
+      "customerName": "Đào Duy Hiếu - HE191090",
       "address": "ĐÁN",
-      "phone": "ZXCB",
-      "totalPrice": 21500000,
+      "phone": "0912345676",
+      "totalPrice": 98000000,
       "status": "Đã giao hàng",
+      "paymentMethod": "COD",
+      "paymentStatus": "Đã thanh toán",
+      "stockRestored": false,
       "date": "2026-06-25T10:27:58.165Z",
       "items": [
         {
@@ -551,6 +555,9 @@
       "phone": "0912345678",
       "totalPrice": 236500000,
       "status": "Đang xử lý",
+      "paymentMethod": "COD",
+      "paymentStatus": "Chưa thanh toán",
+      "stockRestored": false,
       "date": "2026-07-07T05:25:18.586Z",
       "items": [
         {
@@ -575,6 +582,9 @@
       "phone": "11111",
       "totalPrice": 110000000,
       "status": "Đã hủy",
+      "paymentMethod": "COD",
+      "paymentStatus": "Đã hủy",
+      "stockRestored": true,
       "date": "2026-07-07T05:48:58.345Z",
       "items": [
         {
@@ -599,6 +609,9 @@
       "phone": "11111",
       "totalPrice": 14900000,
       "status": "Đã giao hàng",
+      "paymentMethod": "COD",
+      "paymentStatus": "Đã thanh toán",
+      "stockRestored": false,
       "date": "2026-07-07T08:32:22.588Z",
       "items": [
         {
@@ -623,6 +636,9 @@
       "phone": "1111",
       "totalPrice": 163900000,
       "status": "Đã giao hàng",
+      "paymentMethod": "COD",
+      "paymentStatus": "Đã thanh toán",
+      "stockRestored": false,
       "date": "2026-07-07T08:41:39.887Z",
       "items": [
         {
@@ -641,6 +657,5 @@
       "id": "5"
     }
   ],
-  "cart": [],
-  "$schema": "./node_modules/json-server/schema.json"
+  "cart": []
 }
