@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { createItem, getCollection } from "../services/api";
+import { moveGuestCartToUser } from "../utils/cartStorage";
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -87,6 +88,7 @@ export default function Register() {
         role: "CUSTOMER",
       });
 
+      moveGuestCartToUser(newUser.id);
       localStorage.setItem("account", JSON.stringify(newUser));
       setSuccess("Đăng ký thành công! Đang chuyển về trang chủ...");
 

@@ -2,6 +2,11 @@ import { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { createItem, getCollection, getItem } from "../services/api";
 import { getProductImage } from "../utils/productImages";
+import {
+  addCartItem,
+  getStoredAccount,
+  writeBuyNowCart,
+} from "../utils/cartStorage";
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -18,22 +23,27 @@ export default function ProductDetail() {
   const [canReview, setCanReview] = useState(false);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchProductDetail = async () => {
       try {
         setLoading(true);
+        setCanReview(false);
 
         const productData = await getItem("products", id);
-        if (!productData) {
+        if (!productData || productData.status === "INACTIVE") {
           setProduct(null);
           return;
         }
-        const brandsData = await getCollection("brands");
-        const categoriesData = await getCollection("categories");
-        const productsData = await getCollection("products");
-        const ordersData = await getCollection("orders");
-        const reviewsData = await getCollection("reviews");
+        const [brandsData, categoriesData, productsData, ordersData, reviewsData] =
+          await Promise.all([
+            getCollection("brands"),
+            getCollection("categories"),
+            getCollection("products"),
+            getCollection("orders"),
+            getCollection("reviews"),
+          ]);
 
         setProduct(productData);
 
@@ -64,7 +74,7 @@ export default function ProductDetail() {
 
         setReviews(productReviews);
 
-        const currentUser = JSON.parse(localStorage.getItem("account"));
+        const currentUser = getStoredAccount();
 
         if (currentUser) {
           const deliveredOrder = ordersData.find(
@@ -72,7 +82,8 @@ export default function ProductDetail() {
               Number(order.userId) === Number(currentUser.id) &&
               order.status === "Đã giao hàng" &&
               order.items?.some(
-                (item) => Number(item.id) === Number(productData.id),
+                (item) =>
+                  Number(item.productId ?? item.id) === Number(productData.id),
               ),
           );
 
@@ -86,6 +97,7 @@ export default function ProductDetail() {
         }
       } catch (err) {
         console.error(err);
+        setProduct(null);
       } finally {
         setLoading(false);
       }
@@ -95,39 +107,37 @@ export default function ProductDetail() {
   }, [id]);
 
   const addToCart = (goToCheckout = false) => {
-    if (quantity > product.stock) {
+    if (
+      !Number.isInteger(quantity) ||
+      !Number.isFinite(quantity) ||
+      quantity < 1
+    ) {
+      alert("Số lượng mua phải là số nguyên dương!");
+      return;
+    }
+
+    if (product.status === "INACTIVE" || Number(product.stock) <= 0) {
+      alert("Sản phẩm hiện không còn được bán!");
+      return;
+    }
+
+    if (quantity > Number(product.stock)) {
       alert("Số lượng mua không được lớn hơn tồn kho!");
       return;
     }
 
     if (goToCheckout) {
-      localStorage.setItem(
-        "buyNowCart",
-        JSON.stringify([{ ...product, quantity }]),
-      );
+      writeBuyNowCart([{ productId: product.id, quantity }]);
 
       navigate("/checkout?type=buy-now");
       return;
     }
 
-    const cart = JSON.parse(localStorage.getItem("cart")) || [];
-    const exist = cart.find((item) => item.id === product.id);
-
-    if (exist) {
-      if (exist.quantity + quantity > product.stock) {
-        alert(
-          "Không thể thêm sản phẩm! Số lượng trong giỏ đã vượt quá tồn kho.",
-        );
-        return;
-      }
-
-      exist.quantity += quantity;
-    } else {
-      cart.push({ ...product, quantity });
+    const result = addCartItem(product.id, quantity, product.stock);
+    if (!result.ok) {
+      alert("Không thể thêm sản phẩm! Số lượng trong giỏ đã vượt tồn kho.");
+      return;
     }
-
-    localStorage.setItem("cart", JSON.stringify(cart));
-    window.dispatchEvent(new Event("cartUpdated"));
 
     alert("Đã thêm sản phẩm vào giỏ hàng!");
   };
@@ -135,7 +145,7 @@ export default function ProductDetail() {
   const handleQuantityChange = (e) => {
     const value = Number(e.target.value);
 
-    if (value < 1) {
+    if (!Number.isFinite(value) || !Number.isInteger(value) || value < 1) {
       setQuantity(1);
       return;
     }
@@ -151,7 +161,9 @@ export default function ProductDetail() {
   const handleSubmitReview = async (e) => {
     e.preventDefault();
 
-    const currentUser = JSON.parse(localStorage.getItem("account"));
+    if (reviewSubmitting) return;
+
+    const currentUser = getStoredAccount();
 
     if (!currentUser) {
       alert("Vui lòng đăng nhập để đánh giá sản phẩm!");
@@ -165,26 +177,55 @@ export default function ProductDetail() {
       return;
     }
 
-    if (comment.trim() === "") {
-      alert("Vui lòng nhập bình luận!");
+    if (comment.trim().length < 2 || comment.trim().length > 1000) {
+      alert("Bình luận phải có từ 2 đến 1000 ký tự!");
       return;
     }
 
-    const newReview = await createItem("reviews", {
-      productId: product.id,
-      userId: currentUser.id,
-      userName: currentUser.fullName,
-      rating: Number(rating),
-      comment: comment.trim(),
-      date: new Date().toISOString(),
-    });
+    try {
+      setReviewSubmitting(true);
+      const [ordersData, reviewsData] = await Promise.all([
+        getCollection("orders", { userId: currentUser.id }),
+        getCollection("reviews", {
+          userId: currentUser.id,
+          productId: product.id,
+        }),
+      ]);
+      const hasDeliveredProduct = ordersData.some(
+        (order) =>
+          order.status === "Đã giao hàng" &&
+          order.items?.some(
+            (item) =>
+              Number(item.productId ?? item.id) === Number(product.id),
+          ),
+      );
 
-    setReviews([...reviews, newReview]);
-    setCanReview(false);
-    setRating(5);
-    setComment("");
+      if (!hasDeliveredProduct || reviewsData.length > 0) {
+        setCanReview(false);
+        alert("Đơn hàng chưa đủ điều kiện hoặc sản phẩm đã được đánh giá!");
+        return;
+      }
 
-    alert("Gửi đánh giá thành công!");
+      const newReview = await createItem("reviews", {
+        productId: product.id,
+        userId: currentUser.id,
+        userName: currentUser.fullName,
+        rating: Number(rating),
+        comment: comment.trim(),
+        date: new Date().toISOString(),
+      });
+
+      setReviews((current) => [...current, newReview]);
+      setCanReview(false);
+      setRating(5);
+      setComment("");
+      alert("Gửi đánh giá thành công!");
+    } catch (err) {
+      console.error(err);
+      alert("Không thể gửi đánh giá lúc này!");
+    } finally {
+      setReviewSubmitting(false);
+    }
   };
 
   if (loading) {
@@ -443,6 +484,7 @@ export default function ProductDetail() {
 
               <button
                 type="submit"
+                disabled={reviewSubmitting}
                 style={{
                   marginTop: "12px",
                   padding: "10px 20px",
@@ -454,7 +496,7 @@ export default function ProductDetail() {
                   cursor: "pointer",
                 }}
               >
-                Gửi đánh giá
+                {reviewSubmitting ? "Đang gửi..." : "Gửi đánh giá"}
               </button>
             </form>
           )}
