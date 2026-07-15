@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getCollection } from "../services/api";
 import { getProductImage } from "../utils/productImages";
+import { addCartItem } from "../utils/cartStorage";
 
 export default function Home() {
   const [categories, setCategories] = useState([]);
-  const [brands, setBrands] = useState([]);
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
@@ -36,7 +36,6 @@ export default function Home() {
         );
 
         setCategories(activeCategories);
-        setBrands(activeBrands);
         setProducts(activeProducts);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -46,34 +45,16 @@ export default function Home() {
     fetchData();
   }, []);
   const addToCart = (product) => {
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-
-    const exist = cart.find((item) => item.id === product.id);
-
-    if (exist) {
-      // Nếu số lượng sau khi cộng vượt tồn kho
-      if (exist.quantity + 1 > product.stock) {
-        alert(
-          "Không thể thêm sản phẩm! Số lượng trong giỏ đã bằng số lượng tồn kho.",
-        );
-        return;
-      }
-
-      exist.quantity += 1;
-    } else {
-      if (product.stock <= 0) {
-        alert("Sản phẩm đã hết hàng.");
-        return;
-      }
-
-      cart.push({
-        ...product,
-        quantity: 1,
-      });
+    if (product.status === "INACTIVE" || Number(product.stock) <= 0) {
+      alert("Sản phẩm đã hết hàng hoặc ngừng bán.");
+      return;
     }
 
-    localStorage.setItem("cart", JSON.stringify(cart));
-    window.dispatchEvent(new Event("cartUpdated"));
+    const result = addCartItem(product.id, 1, product.stock);
+    if (!result.ok) {
+      alert("Số lượng trong giỏ đã đạt mức tồn kho tối đa.");
+      return;
+    }
 
     alert("Đã thêm sản phẩm vào giỏ hàng!");
   };

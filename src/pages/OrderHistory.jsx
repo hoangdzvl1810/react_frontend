@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getCollection } from "../services/api";
+import { getStoredAccount } from "../utils/cartStorage";
 
 export default function OrderHistory() {
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
     const fetchOrders = async () => {
-      const user = JSON.parse(localStorage.getItem("account"));
+      const user = getStoredAccount();
       if (!user) return;
 
       try {
@@ -26,7 +27,7 @@ export default function OrderHistory() {
     fetchOrders();
   }, []);
 
-  const user = JSON.parse(localStorage.getItem("account"));
+  const user = getStoredAccount();
 
   if (!user) {
     return (
@@ -90,7 +91,9 @@ export default function OrderHistory() {
               >
                 <th style={{ padding: "15px" }}>Mã đơn hàng</th>
                 <th>Ngày đặt</th>
+                <th>Sản phẩm</th>
                 <th>Tổng tiền</th>
+                <th>Thanh toán</th>
                 <th>Trạng thái</th>
               </tr>
             </thead>
@@ -102,8 +105,22 @@ export default function OrderHistory() {
                     #{order.id}
                   </td>
                   <td>{new Date(order.date).toLocaleString("vi-VN")}</td>
+                  <td>
+                    {order.items?.map((item) => (
+                      <div key={item.productId ?? item.id}>
+                        {item.productName ?? item.name} × {item.quantity}
+                      </div>
+                    ))}
+                  </td>
                   <td style={{ color: "#e53e3e", fontWeight: "bold" }}>
-                    {order.totalPrice.toLocaleString("vi-VN")}đ
+                    {Number(order.totalPrice).toLocaleString("vi-VN")}đ
+                  </td>
+                  <td>
+                    {order.paymentMethod === "BANK_TRANSFER"
+                      ? "Chuyển khoản"
+                      : "COD"}
+                    <br />
+                    <small>{order.paymentStatus || "Chưa thanh toán"}</small>
                   </td>
                   <td>{order.status}</td>
                 </tr>
