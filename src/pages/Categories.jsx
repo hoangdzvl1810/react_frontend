@@ -42,7 +42,7 @@ export default function Categories() {
         const activeProducts = productsData.filter(
           (product) =>
             product.status !== "INACTIVE" &&
-            activeCategoryIds.includes(product.categoryId),
+            activeCategoryIds.includes(String(product.categoryId)),
         );
 
         setCategories(activeCategories);

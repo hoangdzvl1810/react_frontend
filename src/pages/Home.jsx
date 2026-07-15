@@ -31,8 +31,8 @@ export default function Home() {
         const activeProducts = productsData.filter(
           (product) =>
             product.status !== "INACTIVE" &&
-            activeCategoryIds.includes(product.categoryId) &&
-            activeBrandIds.includes(product.brandId),
+            activeCategoryIds.includes(String(product.categoryId)) &&
+            activeBrandIds.includes(String(product.brandId)),
         );
 
         setCategories(activeCategories);

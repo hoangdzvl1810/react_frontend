@@ -47,8 +47,8 @@ export default function Brands() {
         const activeProducts = productsData.filter(
           (product) =>
             product.status !== "INACTIVE" &&
-            activeBrandIds.includes(product.brandId) &&
-            activeCategoryIds.includes(product.categoryId),
+            activeBrandIds.includes(String(product.brandId)) &&
+            activeCategoryIds.includes(String(product.categoryId)),
         );
 
         setBrands(activeBrands);
