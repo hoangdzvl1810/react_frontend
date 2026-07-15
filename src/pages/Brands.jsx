@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { getCollection } from "../services/api";
-import { getBrandImage } from "../utils/brandImages";
 import { getProductImage } from "../utils/productImages";
 import { addCartItem } from "../utils/cartStorage";
 
@@ -10,8 +9,6 @@ const SORT_OPTIONS = {
   priceAsc: "Giá thấp đến cao",
   priceDesc: "Giá cao đến thấp",
 };
-
-const logoFileName = (brandName) => `${brandName.toLowerCase()}.png`;
 
 export default function Brands() {
   const [brands, setBrands] = useState([]);
@@ -24,6 +21,7 @@ export default function Brands() {
   const keyword = searchParams.get("keyword") || "";
   const sort = searchParams.get("sort") || "default";
 
+  // Tải các thương hiệu, danh mục và sản phẩm đang hoạt động.
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -65,13 +63,9 @@ export default function Brands() {
     fetchData();
   }, []);
 
-  const getProductCountByBrand = (brandIdValue) => {
-    return products.filter((product) => product.brandId === brandIdValue)
-      .length;
-  };
-
   const selectedBrand = brands.find((item) => String(item.id) === brandId);
 
+  // Lọc và sắp xếp sản phẩm theo các tham số trên URL.
   const getFilteredProducts = () => {
     const normalizedKeyword = keyword.trim().toLowerCase();
 
@@ -106,6 +100,8 @@ export default function Brands() {
   };
 
   const filteredProducts = getFilteredProducts();
+
+  // Cập nhật bộ lọc trên URL mà không làm mất tham số khác.
   const updateParam = (key, value) => {
     const nextParams = new URLSearchParams(searchParams);
 
@@ -131,6 +127,8 @@ export default function Brands() {
   const heading = selectedBrand
     ? `Thương hiệu ${selectedBrand.name}`
     : "Thương hiệu sản phẩm";
+
+  // Kiểm tra tồn kho trước khi thêm sản phẩm vào giỏ.
   const addToCart = (product) => {
     if (product.status === "INACTIVE" || Number(product.stock) <= 0) {
       alert("Sản phẩm đã hết hàng hoặc ngừng bán.");
@@ -165,42 +163,8 @@ export default function Brands() {
       </header>
 
       <div className="brand-layout">
+        {/* Bộ lọc khoảng giá. */}
         <aside className="brand-sidebar">
-          <div className="filter-panel">
-            <div className="filter-title">
-              <h2>Thương hiệu</h2>
-              <span>+</span>
-            </div>
-
-            <label className={!brandId ? "is-checked" : ""}>
-              <input
-                type="radio"
-                checked={!brandId}
-                onChange={() => updateParam("id", "")}
-              />
-              Tất cả thương hiệu
-            </label>
-
-            {brands.map((brand) => (
-              <label
-                key={brand.id}
-                className={brandId === String(brand.id) ? "is-checked" : ""}
-              >
-                <input
-                  type="radio"
-                  checked={brandId === String(brand.id)}
-                  onChange={() => updateParam("id", String(brand.id))}
-                />
-
-                {brand.name}
-
-                <span className="brand-count">
-                  ({getProductCountByBrand(brand.id)})
-                </span>
-              </label>
-            ))}
-          </div>
-
           <div className="filter-panel">
             <div className="filter-title">
               <h2>Khoảng giá</h2>
@@ -250,6 +214,7 @@ export default function Brands() {
         </aside>
 
         <section className="brand-content">
+          {/* Danh sách chọn nhanh thương hiệu. */}
           <div className="brand-strip">
             <Link
               className={`brand-card view-all ${!brandId ? "active" : ""}`}
@@ -259,27 +224,17 @@ export default function Brands() {
               <small>Tất cả</small>
             </Link>
 
-            {brands.map((brand) => {
-              const logo = getBrandImage(logoFileName(brand.name));
-
-              return (
-                <Link
-                  key={brand.id}
-                  className={`brand-card ${
-                    brandId === String(brand.id) ? "active" : ""
-                  }`}
-                  to={`/brands?id=${brand.id}`}
-                >
-                  {logo ? (
-                    <img src={logo} alt={brand.name} />
-                  ) : (
-                    <span className="brand-text-logo">{brand.name}</span>
-                  )}
-
-                  <small>{brand.name}</small>
-                </Link>
-              );
-            })}
+            {brands.map((brand) => (
+              <Link
+                key={brand.id}
+                className={`brand-card ${
+                  brandId === String(brand.id) ? "active" : ""
+                }`}
+                to={`/brands?id=${brand.id}`}
+              >
+                <span className="brand-name">{brand.name}</span>
+              </Link>
+            ))}
           </div>
 
           <div className="brand-result-head">
@@ -297,16 +252,17 @@ export default function Brands() {
             </div>
 
             <form
-              className="category-product-search-form"
+              className="brand-product-search-form"
               onSubmit={handleSearch}
             >
               <input
+                type="text"
                 defaultValue={keyword}
                 name="keyword"
                 placeholder="Tìm sản phẩm..."
               />
 
-              <button>Tìm kiếm</button>
+              <button type="submit">Tìm kiếm</button>
             </form>
 
             <label>

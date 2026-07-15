@@ -68,10 +68,6 @@ body.brands-page {
     overflow: hidden;
 }
 
-.brand-filter-form {
-    display: contents;
-}
-
 .filter-panel {
     padding: 18px;
     border-bottom: 1px solid #eef2f7;
@@ -118,40 +114,9 @@ body.brands-page {
     font-weight: 800;
 }
 
-.brand-count {
-    color: #9ca3af;
-    font-weight: 500;
-}
-
 .filter-panel input[type="checkbox"],
 .filter-panel input[type="radio"] {
     accent-color: #ed1c24;
-}
-
-.more-filter {
-    display: inline-block;
-    margin-top: 4px;
-    color: #ed1c24;
-    font-size: 13px;
-    font-weight: 800;
-    text-decoration: none;
-}
-
-.price-range {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin: 14px 0;
-}
-
-.price-range input {
-    width: 100%;
-    height: 34px;
-    border: 1px solid #d9e0ea;
-    border-radius: 5px;
-    padding: 0 10px;
-    color: #6b7280;
-    font-weight: 600;
 }
 
 .filter-panel button {
@@ -203,12 +168,6 @@ body.brands-page {
     box-shadow: 0 8px 20px rgba(237, 28, 36, 0.14);
 }
 
-.brand-card img {
-    max-width: 78px;
-    max-height: 30px;
-    object-fit: contain;
-}
-
 .brand-card small {
     color: #4b5563;
     font-size: 11px;
@@ -219,10 +178,14 @@ body.brands-page {
     color: #ed1c24;
 }
 
-.brand-text-logo {
+.brand-name {
     color: #1f2937;
     font-size: 16px;
     font-weight: 900;
+}
+
+.brand-card.active .brand-name {
+    color: #ed1c24;
 }
 
 .view-all span {
@@ -267,10 +230,6 @@ body.brands-page {
     white-space: nowrap;
 }
 
-.brand-sort-form {
-    margin: 0;
-}
-
 .brand-product-search-form {
     flex: 1;
     max-width: 360px;
@@ -291,6 +250,7 @@ body.brands-page {
     outline: 0;
     padding: 0 12px;
     color: #374151;
+    font-family: inherit;
     font-size: 13px;
     font-weight: 600;
 }
@@ -300,6 +260,7 @@ body.brands-page {
     border: 0;
     background: #111827;
     color: #fff;
+    font-family: inherit;
     font-size: 13px;
     font-weight: 800;
     cursor: pointer;
@@ -341,10 +302,6 @@ body.brands-page {
     color: #111827;
 }
 
-.brand-empty p {
-    margin: 0;
-}
-
 @media (max-width: 1180px) {
     .brand-strip {
         grid-template-columns: repeat(4, 1fr);
@@ -360,13 +317,7 @@ body.brands-page {
         grid-template-columns: 1fr;
     }
 
-    .brand-sidebar {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-    }
-
     .filter-panel {
-        border-right: 1px solid #eef2f7;
         border-bottom: 0;
     }
 
@@ -387,8 +338,7 @@ body.brands-page {
     }
 
     .brand-strip,
-    .brand-product-grid,
-    .brand-sidebar {
+    .brand-product-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 
