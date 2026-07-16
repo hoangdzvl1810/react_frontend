@@ -9,7 +9,7 @@ export default function Profile() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   useEffect(() => {
-    document.body.className = "";
+    document.body.className = "profile-body";
 
     const storedAccount = JSON.parse(localStorage.getItem("account"));
 
