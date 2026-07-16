@@ -138,9 +138,7 @@ export default function Home() {
                   <img
                     src={getProductImage(product.image)}
                     alt={product.name}
-                    onError={(e) => {
-                      e.target.src = "https://via.placeholder.com/200";
-                    }}
+                    
                   />
                 </figure>
 
