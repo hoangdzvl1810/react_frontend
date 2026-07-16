@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { getCollection } from "../services/api";
 import { getProductImage } from "../utils/productImages";
-import { addCartItem } from "../utils/cartStorage";
+import { addCartItem, getStoredAccount } from "../utils/cartStorage";
 
 const SORT_OPTIONS = {
   default: "Mặc định",
@@ -11,6 +11,7 @@ const SORT_OPTIONS = {
 };
 
 export default function Categories() {
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -58,7 +59,7 @@ export default function Categories() {
   }, []);
 
   const getProductCountByCategory = (categoryIdValue) => {
-    return products.filter((product) => product.categoryId === categoryIdValue)
+    return products.filter((product) => String(product.categoryId) === String(categoryIdValue))
       .length;
   };
 
@@ -125,6 +126,11 @@ export default function Categories() {
   };
 
   const addToCart = (product) => {
+    if (!getStoredAccount()) {
+      navigate("/login");
+      return;
+    }
+
     if (product.status === "INACTIVE" || Number(product.stock) <= 0) {
       alert("Sản phẩm đã hết hàng hoặc ngừng bán.");
       return;

@@ -23,7 +23,7 @@ export default function AdminBrands() {
 
   const productCountByBrand = useMemo(() => {
     return products.reduce((acc, product) => {
-      acc[product.brandId] = (acc[product.brandId] || 0) + 1;
+      acc[String(product.brandId)] = (acc[String(product.brandId)] || 0) + 1;
       return acc;
     }, {});
   }, [products]);

@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { getCollection } from "../services/api";
 import { getProductImage } from "../utils/productImages";
-import { addCartItem } from "../utils/cartStorage";
+import { addCartItem, getStoredAccount } from "../utils/cartStorage";
 
 const SORT_OPTIONS = {
   default: "Mặc định",
@@ -11,6 +11,7 @@ const SORT_OPTIONS = {
 };
 
 export default function Brands() {
+  const navigate = useNavigate();
   const [brands, setBrands] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -130,6 +131,11 @@ export default function Brands() {
 
   // Kiểm tra tồn kho trước khi thêm sản phẩm vào giỏ.
   const addToCart = (product) => {
+    if (!getStoredAccount()) {
+      navigate("/login");
+      return;
+    }
+
     if (product.status === "INACTIVE" || Number(product.stock) <= 0) {
       alert("Sản phẩm đã hết hàng hoặc ngừng bán.");
       return;

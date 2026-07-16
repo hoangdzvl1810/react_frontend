@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { getCollection } from "../services/api";
 import { getProductImage } from "../utils/productImages";
-import { addCartItem } from "../utils/cartStorage";
+import { addCartItem, getStoredAccount } from "../utils/cartStorage";
 
 export default function Home() {
+  const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
 
@@ -24,9 +25,9 @@ export default function Home() {
         );
 
         const activeCategoryIds = activeCategories.map(
-          (category) => category.id,
+          (category) => String(category.id),
         );
-        const activeBrandIds = activeBrands.map((brand) => brand.id);
+        const activeBrandIds = activeBrands.map((brand) => String(brand.id));
 
         const activeProducts = productsData.filter(
           (product) =>
@@ -45,6 +46,11 @@ export default function Home() {
     fetchData();
   }, []);
   const addToCart = (product) => {
+    if (!getStoredAccount()) {
+      navigate("/login");
+      return;
+    }
+
     if (product.status === "INACTIVE" || Number(product.stock) <= 0) {
       alert("Sản phẩm đã hết hàng hoặc ngừng bán.");
       return;

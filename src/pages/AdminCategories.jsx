@@ -23,7 +23,7 @@ export default function AdminCategories() {
 
   const productCountByCategory = useMemo(() => {
     return products.reduce((acc, product) => {
-      acc[product.categoryId] = (acc[product.categoryId] || 0) + 1;
+      acc[String(product.categoryId)] = (acc[String(product.categoryId)] || 0) + 1;
       return acc;
     }, {});
   }, [products]);
