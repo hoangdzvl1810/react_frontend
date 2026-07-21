@@ -3,8 +3,11 @@ import { useState, useEffect } from "react";
 import { getStoredAccount, readCart } from "../utils/cartStorage";
 
 export default function Header() {
+  // Lưu thông tin tài khoản và tổng số sản phẩm trong giỏ hàng
   const [account, setAccount] = useState(null);
   const [cartCount, setCartCount] = useState(0);
+
+  // Đồng bộ tài khoản khi đăng nhập, đăng xuất hoặc localStorage thay đổi
   useEffect(() => {
     const updateAccount = () => {
       const storedAccount = getStoredAccount();
@@ -21,6 +24,8 @@ export default function Header() {
       window.removeEventListener("storage", updateAccount);
     };
   }, []);
+
+  // Tính lại tổng số lượng sản phẩm khi giỏ hàng hoặc tài khoản thay đổi
   useEffect(() => {
     const updateCartCount = () => {
       const storedAccount = getStoredAccount();
@@ -49,19 +54,24 @@ export default function Header() {
       window.removeEventListener("storage", updateCartCount);
     };
   }, [account]);
+
+  // Xóa tài khoản và quay về trang chủ khi đăng xuất
   const handleLogout = (e) => {
     e.preventDefault();
     localStorage.removeItem("account");
     window.location.href = "/"; // Reload về trang chủ
   };
 
+  // Dữ liệu dùng để phân quyền và hiển thị người dùng
   const roleName = account?.role || "CUSTOMER";
   const fullName = account?.fullName || "";
   return (
     <header className="main-header">
       <div className="header-top-line"></div>
 
+      {/* Menu điều hướng thay đổi theo vai trò */}
       <nav className="header-menu">
+        {/* Menu dành cho khách hàng */}
         {roleName === "CUSTOMER" && (
           <>
             <Link to="/" className="menu-item active">
@@ -87,6 +97,7 @@ export default function Header() {
           </>
         )}
 
+        {/* Menu dành cho quản trị viên */}
         {roleName === "ADMIN" && (
           <>
             <Link to="/dashboard" className="menu-item active">
@@ -115,6 +126,7 @@ export default function Header() {
       </nav>
 
       <div className="header-bottom">
+        {/* Admin chỉ thấy logo; khách hàng có thể bấm để về trang chủ */}
         {roleName === "ADMIN" ? (
           <div className="logo-box" style={{ cursor: "default" }}>
             <div className="logo-icon">P</div>
@@ -138,6 +150,8 @@ export default function Header() {
             </div>
           </Link>
         )}
+
+        {/* Chỉ khách hàng mới sử dụng thanh tìm kiếm */}
         {roleName !== "ADMIN" && (
           <form className="search-box" action="/categories" method="get">
             <input
@@ -153,6 +167,7 @@ export default function Header() {
         )}
 
         <div className="right-box">
+          {/* Giỏ hàng chỉ hiển thị với khách hàng */}
           {roleName === "CUSTOMER" && (
             <Link className="cart-box" to="/cart">
               <div className="cart-icon">
@@ -163,6 +178,7 @@ export default function Header() {
             </Link>
           )}
 
+          {/* Hiển thị tài khoản hoặc nút đăng nhập/đăng ký */}
           {account ? (
             <div className="user-dropdown">
               <button className="dropdown-toggle" type="button">

@@ -3,6 +3,7 @@ import { getCollection, updateItem } from "../services/api";
 import { getStoredAccount } from "../utils/cartStorage";
 import "../assets/css/admin-order.css";
 
+// Danh sách trạng thái đơn hàng
 const ORDER_STATUSES = [
   "Đang xử lý",
   "Đang giao hàng",
@@ -10,6 +11,7 @@ const ORDER_STATUSES = [
   "Đã hủy",
 ];
 
+// Quy định các trạng thái được phép chuyển tiếp
 const ALLOWED_TRANSITIONS = {
   "Đang xử lý": ["Đang giao hàng", "Đã hủy"],
   "Đang giao hàng": ["Đã giao hàng"],
@@ -18,15 +20,19 @@ const ALLOWED_TRANSITIONS = {
 };
 
 export default function AdminOrders() {
+  // Dữ liệu đơn hàng, người dùng và các điều kiện lọc
   const [orders, setOrders] = useState([]);
   const [keyword, setKeyword] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [users, setUsers] = useState([]);
   const [updatingOrderIds, setUpdatingOrderIds] = useState([]);
+
+  // Tải dữ liệu khi trang được mở
   useEffect(() => {
     loadOrders();
   }, []);
 
+  // Lấy danh sách đơn hàng và người dùng từ API
   const loadOrders = async () => {
     const ordersData = await getCollection("orders");
     const usersData = await getCollection("users");
@@ -35,12 +41,16 @@ export default function AdminOrders() {
     setUsers(usersData);
   };
 
+  // Định dạng giá tiền theo đơn vị Việt Nam
   const formatPrice = (price) => Number(price).toLocaleString("vi-VN") + "đ";
 
+  // Tìm tên khách hàng theo ID tài khoản
   const getCustomerName = (userId) => {
     const user = users.find((item) => Number(item.id) === Number(userId));
     return user ? user.fullName : `Không tìm thấy tài khoản`;
   };
+
+  // Cập nhật trạng thái đơn và hoàn kho nếu đơn bị hủy
   const handleChangeStatus = async (order, status) => {
     if (status === order.status) return;
     if (!(ALLOWED_TRANSITIONS[order.status] || []).includes(status)) {
@@ -53,6 +63,7 @@ export default function AdminOrders() {
     const adjustedProducts = [];
 
     try {
+      // Cộng lại tồn kho một lần khi chuyển đơn sang trạng thái đã hủy
       if (status === "Đã hủy" && !order.stockRestored) {
         const products = await getCollection("products");
 
@@ -75,6 +86,7 @@ export default function AdminOrders() {
         }
       }
 
+      // Lưu trạng thái mới, thời gian và lịch sử người thực hiện
       const now = new Date().toISOString();
       const currentAdmin = getStoredAccount();
       const updatedOrder = await updateItem("orders", order.id, {
@@ -101,6 +113,8 @@ export default function AdminOrders() {
       );
     } catch (err) {
       console.error(err);
+
+      // Khôi phục tồn kho cũ nếu quá trình cập nhật đơn thất bại
       if (adjustedProducts.length) {
         await Promise.allSettled(
           adjustedProducts.map((product) =>
@@ -115,6 +129,8 @@ export default function AdminOrders() {
       );
     }
   };
+
+  // Lọc đơn hàng theo ID và trạng thái
   const filteredOrders = orders.filter((order) => {
     const matchId =
       keyword.trim() === "" || String(order.id).includes(keyword.trim());
@@ -127,6 +143,8 @@ export default function AdminOrders() {
   return (
     <main className="admin-page">
       <h1>Quản lý đơn hàng</h1>
+
+      {/* Bộ lọc theo ID và trạng thái đơn hàng */}
       <div
         style={{
           display: "flex",
@@ -169,6 +187,7 @@ export default function AdminOrders() {
         </select>
       </div>
 
+      {/* Bảng danh sách và chi tiết đơn hàng */}
       <div className="admin-table-wrapper">
         <table className="admin-table">
           <thead>
@@ -214,6 +233,7 @@ export default function AdminOrders() {
                 <td>{formatPrice(order.totalPrice)}</td>
 
                 <td>
+                  {/* Chỉ hiển thị những trạng thái được phép chuyển đến */}
                   <select
                     className="admin-status-select"
                     value={order.status}
@@ -236,6 +256,7 @@ export default function AdminOrders() {
               </tr>
             ))}
 
+            {/* Thông báo khi không có đơn hàng phù hợp */}
             {filteredOrders.length === 0 && (
               <tr>
                 <td colSpan="8" style={{ textAlign: "center" }}>

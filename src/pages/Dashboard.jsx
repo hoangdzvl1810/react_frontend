@@ -173,8 +173,8 @@ export default function Dashboard() {
           <thead>
             <tr>
               <th>STT</th>
-              <th>Chỉ số</th>
-              <th>Giá trị</th>
+              <th>Danh Mục </th>
+              <th>Thống kê</th>
               <th>Thao tác</th>
             </tr>
           </thead>

@@ -129,7 +129,7 @@
       "id": 1,
       "name": "AMD Ryzen 5 7600",
       "price": 5500000,
-      "stock": 19,
+      "stock": 62,
       "categoryId": 1,
       "brandId": 1,
       "image": "amd-ryzen-5-7600.jpg",
@@ -140,7 +140,7 @@
       "id": 2,
       "name": "AMD Ryzen 7 7700X",
       "price": 8500000,
-      "stock": 36,
+      "stock": 35,
       "categoryId": 1,
       "brandId": 1,
       "image": "amd-ryzen-7-7700x.jpg",
@@ -415,7 +415,7 @@
       "id": 27,
       "name": "Logitech G Pro X Keyboard",
       "price": 3200000,
-      "stock": 23,
+      "stock": 22,
       "categoryId": 9,
       "brandId": 10,
       "image": "logitech-g-pro-x-kb.jpg",
@@ -540,10 +540,10 @@
       "address": "thôn 3",
       "phone": "0912345678",
       "totalPrice": 236500000,
-      "status": "Đang xử lý",
+      "status": "Đã hủy",
       "paymentMethod": "COD",
       "paymentStatus": "Chưa thanh toán",
-      "stockRestored": false,
+      "stockRestored": true,
       "date": "2026-07-07T05:25:18.586Z",
       "items": [
         {
@@ -559,7 +559,16 @@
           "quantity": 43
         }
       ],
-      "id": 2
+      "id": 2,
+      "updatedAt": "2026-07-21T06:45:02.898Z",
+      "cancelledAt": "2026-07-21T06:45:02.898Z",
+      "statusHistory": [
+        {
+          "status": "Đã hủy",
+          "changedAt": "2026-07-21T06:45:02.898Z",
+          "changedBy": 1
+        }
+      ]
     },
     {
       "userId": 5,
@@ -671,6 +680,43 @@
         }
       ],
       "id": 6
+    },
+    {
+      "userId": 6,
+      "customerName": "Đào Duy Hiếu - HE191090",
+      "address": "thach that ha noi",
+      "phone": "0938372837",
+      "totalPrice": 11700000,
+      "status": "Đang xử lý",
+      "paymentMethod": "BANK_TRANSFER",
+      "paymentStatus": "Chờ thanh toán",
+      "stockRestored": false,
+      "date": "2026-07-21T06:45:56.599Z",
+      "updatedAt": "2026-07-21T06:45:56.599Z",
+      "statusHistory": [
+        {
+          "status": "Đang xử lý",
+          "changedAt": "2026-07-21T06:45:56.599Z",
+          "changedBy": 6
+        }
+      ],
+      "items": [
+        {
+          "productId": 27,
+          "productName": "Logitech G Pro X Keyboard",
+          "unitPrice": 3200000,
+          "quantity": 1,
+          "lineTotal": 3200000
+        },
+        {
+          "productId": 2,
+          "productName": "AMD Ryzen 7 7700X",
+          "unitPrice": 8500000,
+          "quantity": 1,
+          "lineTotal": 8500000
+        }
+      ],
+      "id": 7
     }
   ],
   "cart": []
