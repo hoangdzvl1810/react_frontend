@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { createItem, getCollection, updateItem } from "../services/api";
+import { getNextNumericId } from "../utils/getNextNumericId";
 
 export default function AdminBrands() {
   const [brands, setBrands] = useState([]);
@@ -60,6 +61,7 @@ export default function AdminBrands() {
     }
 
     const createdBrand = await createItem("brands", {
+      id: getNextNumericId(brands),
       name: trimmedName,
       status: "ACTIVE",
     });
