@@ -2,6 +2,16 @@ import { useEffect, useState } from "react";
 import { createItem, getCollection, updateItem } from "../services/api";
 import { getProductImage } from "../utils/productImages";
 
+const getNextProductId = (products) =>
+  String(
+    products.reduce((maxId, product) => {
+      const productId = Number(product.id);
+      return Number.isInteger(productId) && productId > maxId
+        ? productId
+        : maxId;
+    }, 0) + 1,
+  );
+
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -69,6 +79,7 @@ export default function AdminProducts() {
     }
 
     const newProduct = {
+      id: getNextProductId(products),
       name: form.name.trim(),
       price: priceNum,
       stock: stockNum,
