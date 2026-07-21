@@ -23,7 +23,7 @@ export default function AdminCategories() {
 
   const productCountByCategory = useMemo(() => {
     return products.reduce((acc, product) => {
-      acc[product.categoryId] = (acc[product.categoryId] || 0) + 1;
+      acc[String(product.categoryId)] = (acc[String(product.categoryId)] || 0) + 1;
       return acc;
     }, {});
   }, [products]);
@@ -45,13 +45,24 @@ export default function AdminCategories() {
   const handleAddCategory = async (e) => {
     e.preventDefault();
 
-    if (name.trim() === "") {
+    const trimmedName = name.trim();
+
+    if (trimmedName === "") {
       alert("Tên danh mục không được để trống!");
       return;
     }
 
+    const isDuplicate = categories.some(
+      (c) => c.name.trim().toLowerCase() === trimmedName.toLowerCase()
+    );
+
+    if (isDuplicate) {
+      alert("Tên danh mục đã tồn tại trong hệ thống!");
+      return;
+    }
+
     const createdCategory = await createItem("categories", {
-      name: name.trim(),
+      name: trimmedName,
       status: "ACTIVE",
     });
 
@@ -67,15 +78,26 @@ export default function AdminCategories() {
 
     if (newName === null) return;
 
-    if (newName.trim() === "") {
+    const trimmedNewName = newName.trim();
+
+    if (trimmedNewName === "") {
       alert("Tên danh mục không được để trống!");
       return;
     }
 
-    if (newName.trim() === category.name) return;
+    if (trimmedNewName === category.name) return;
+
+    const isDuplicate = categories.some(
+      (c) => c.id !== category.id && c.name.trim().toLowerCase() === trimmedNewName.toLowerCase()
+    );
+
+    if (isDuplicate) {
+      alert("Tên danh mục này đã tồn tại trong hệ thống!");
+      return;
+    }
 
     const updatedCategory = await updateItem("categories", category.id, {
-      name: newName.trim(),
+      name: trimmedNewName,
     });
 
     setCategories(

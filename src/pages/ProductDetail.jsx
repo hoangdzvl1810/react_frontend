@@ -48,10 +48,10 @@ export default function ProductDetail() {
         setProduct(productData);
 
         const currentBrand =
-          brandsData.find((item) => item.id === productData?.brandId) || null;
+          brandsData.find((item) => String(item.id) === String(productData?.brandId)) || null;
 
         const currentCategory =
-          categoriesData.find((item) => item.id === productData?.categoryId) ||
+          categoriesData.find((item) => String(item.id) === String(productData?.categoryId)) ||
           null;
 
         setBrand(currentBrand);
@@ -107,6 +107,11 @@ export default function ProductDetail() {
   }, [id]);
 
   const addToCart = (goToCheckout = false) => {
+    if (!getStoredAccount()) {
+      navigate("/login");
+      return;
+    }
+
     if (
       !Number.isInteger(quantity) ||
       !Number.isFinite(quantity) ||

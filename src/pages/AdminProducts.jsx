@@ -45,12 +45,35 @@ export default function AdminProducts() {
   const handleAddProduct = async (e) => {
     e.preventDefault();
 
+    const normalizedName = form.name.trim().toLowerCase();
+    const isDuplicate = products.some(
+      (p) => p.name.trim().toLowerCase() === normalizedName
+    );
+
+    if (isDuplicate) {
+      alert("Tên sản phẩm đã tồn tại trong hệ thống!");
+      return;
+    }
+
+    const priceNum = Number(form.price);
+    const stockNum = Number(form.stock);
+
+    if (priceNum < 0) {
+      alert("Giá bán không được âm!");
+      return;
+    }
+
+    if (stockNum < 0) {
+      alert("Số lượng tồn kho không được âm!");
+      return;
+    }
+
     const newProduct = {
-      name: form.name,
-      price: Number(form.price),
-      stock: Number(form.stock),
-      categoryId: Number(form.categoryId),
-      brandId: Number(form.brandId),
+      name: form.name.trim(),
+      price: priceNum,
+      stock: stockNum,
+      categoryId: Number(String(form.categoryId)),
+      brandId: Number(String(form.brandId)),
       image: form.image,
       description: form.description,
       status: form.status,
@@ -121,14 +144,25 @@ export default function AdminProducts() {
     // Người dùng bấm Cancel
     if (newName === null) return;
 
+    const trimmedNewName = newName.trim();
+
     // Chỉ nhập khoảng trắng hoặc để trống
-    if (newName.trim() === "") {
+    if (trimmedNewName === "") {
       alert("Tên sản phẩm không được để trống!");
       return;
     }
 
     // Không thay đổi tên
-    if (newName.trim() === product.name) {
+    if (trimmedNewName === product.name) {
+      return;
+    }
+
+    const isDuplicate = products.some(
+      (p) => p.id !== product.id && p.name.trim().toLowerCase() === trimmedNewName.toLowerCase()
+    );
+
+    if (isDuplicate) {
+      alert("Tên sản phẩm này đã tồn tại trong hệ thống!");
       return;
     }
 
