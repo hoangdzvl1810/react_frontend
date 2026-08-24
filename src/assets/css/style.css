@@ -3738,16 +3738,7 @@ body.home-page .home-pagination a.active {
     display: block !important;
 }
 
-body.profile-body {
-    background-color: #f0f2f5;
-    margin: 0;
-    padding: 0;
-    display: flex !important;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    overflow: hidden;
-}
+
 
 /* ==================== CART PAGE ==================== */
 

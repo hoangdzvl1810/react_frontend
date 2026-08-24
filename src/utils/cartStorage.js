@@ -20,25 +20,11 @@ const getOwnerSuffix = () => {
   return account?.id != null ? `user:${account.id}` : "guest";
 };
 
-//Sinh key lưu cart.
 const getCartKey = () => `cart:${getOwnerSuffix()}`;
 
-//Sinh key lưu buynow.
 const getBuyNowKey = () => `buyNowCart:${getOwnerSuffix()}`;
 
-/**
- * 
- * [
-   {productId:1, quantity:2},
-   {productId:1, quantity:3},
-   {productId:2, quantity:1}
-]
 
-[
-   {productId:1, quantity:5},
-   {productId:2, quantity:1}
-]
- */
 const normalizeCart = (items) => {
   if (!Array.isArray(items)) return [];
 

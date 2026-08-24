@@ -1,13 +1,19 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { getCollection } from "../services/api";
-import { moveGuestCartToUser } from "../utils/cartStorage";
+import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const toast = useToast();
 
   useEffect(() => {
     document.body.className = "login-page";
@@ -15,34 +21,37 @@ export default function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
 
-    const users = await getCollection("users");
+    try {
+      const users = await getCollection("users");
 
-    console.log("users:", users);
-    console.log("email nhập:", email);
-    console.log("password nhập:", password);
+      const user = (users || []).find(
+        (item) =>
+          item.email?.trim().toLowerCase() === email.trim().toLowerCase() &&
+          String(item.password).trim() === password.trim(),
+      );
 
-    const user = users.find(
-      (item) =>
-        item.email?.trim().toLowerCase() === email.trim().toLowerCase() &&
-        String(item.password).trim() === password.trim(),
-    );
-
-    console.log("user tìm thấy:", user);
-
-    if (user) {
-      moveGuestCartToUser(user.id);
-      localStorage.setItem("account", JSON.stringify(user));
-      window.dispatchEvent(new Event("accountUpdated"));
-      if (user.role === "ADMIN") {
-        window.location.href = "/dashboard";
+      if (user) {
+        login(user);
+        toast.success(`Chào mừng ${user.fullName || user.username} đã quay trở lại!`);
+        if (user.role === "ADMIN") {
+          navigate("/dashboard");
+        } else {
+          navigate("/");
+        }
       } else {
-        window.location.href = "/";
+        setError("Tài khoản hoặc mật khẩu không chính xác!");
+        toast.error("Đăng nhập thất bại: Sai email hoặc mật khẩu!");
       }
-    } else {
-      setError("Tài khoản hoặc mật khẩu không chính xác!");
+    } catch (err) {
+      setError("Không thể kết nối đến máy chủ. Vui lòng thử lại!");
+    } finally {
+      setLoading(false);
     }
   };
+
   return (
     <main className="auth-page">
       <Link to="/" className="auth-back-link">
@@ -63,7 +72,7 @@ export default function Login() {
             <div className="auth-input">
               <i className="fa-regular fa-envelope auth-input-icon"></i>
               <input
-                type="text"
+                type="email"
                 id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -82,7 +91,7 @@ export default function Login() {
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Nhập: 123"
+                placeholder="Nhập mật khẩu..."
                 required
               />
               <button
@@ -104,8 +113,8 @@ export default function Login() {
             </Link>
           </div>
 
-          <button type="submit" className="auth-submit">
-            Đăng nhập
+          <button type="submit" className="auth-submit" disabled={loading}>
+            {loading ? "Đang đăng nhập..." : "Đăng nhập"}
           </button>
         </form>
 
@@ -113,7 +122,7 @@ export default function Login() {
 
         <div className="auth-footer">
           Bạn chưa có tài khoản?
-          <Link to="/register"> Đăng ký</Link>
+          <Link to="/register"> Đăng ký ngay</Link>
         </div>
       </section>
     </main>

@@ -1,32 +1,31 @@
 import { useState, useEffect } from "react";
 import { updateItem } from "../services/api";
+import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import backgroundImage from "../assets/images/background.jpg";
+
 export default function Profile() {
-  const [account, setAccount] = useState(null);
+  const { account, updateAccount } = useAuth();
+  const toast = useToast();
   const [fullName, setFullName] = useState("");
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    document.body.className = "profile-body";
-
-    const storedAccount = JSON.parse(localStorage.getItem("account"));
-
-    if (!storedAccount) {
-      window.location.href = "/login";
-      return;
+    if (account) {
+      setFullName(account.fullName || account.username || "");
     }
-
-    setAccount(storedAccount);
-    setFullName(storedAccount.fullName || "");
-  }, []);
+  }, [account]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!account) return;
+
     if (fullName.trim() === "") {
-      alert("Họ tên không được để trống!");
+      toast.error("Họ tên không được để trống!");
       return;
     }
 
@@ -36,54 +35,54 @@ export default function Profile() {
 
     if (oldPassword || newPassword || confirmPassword) {
       if (oldPassword.trim() === "") {
-        alert("Vui lòng nhập mật khẩu cũ!");
+        toast.error("Vui lòng nhập mật khẩu hiện tại!");
         return;
       }
 
       if (oldPassword !== account.password) {
-        alert("Mật khẩu cũ không chính xác!");
+        toast.error("Mật khẩu hiện tại không chính xác!");
         return;
       }
 
       if (newPassword.trim() === "") {
-        alert("Mật khẩu mới không được để trống!");
+        toast.error("Mật khẩu mới không được để trống!");
         return;
       }
 
       if (newPassword.length < 8 || newPassword.length > 31) {
-        alert("Mật khẩu mới phải từ 8 đến 31 ký tự!");
+        toast.error("Mật khẩu mới phải từ 8 đến 31 ký tự!");
         return;
       }
 
       if (newPassword !== confirmPassword) {
-        alert("Xác nhận mật khẩu mới không khớp!");
+        toast.error("Xác nhận mật khẩu mới không khớp!");
         return;
       }
 
       if (newPassword === oldPassword) {
-        alert("Mật khẩu mới không được trùng mật khẩu cũ!");
+        toast.error("Mật khẩu mới không được trùng mật khẩu cũ!");
         return;
       }
 
       payload.password = newPassword;
     }
 
-    const updatedUser = await updateItem("users", account.id, payload);
+    try {
+      setSubmitting(true);
+      const updatedUser = await updateItem("users", account.id, payload);
+      updateAccount(updatedUser);
 
-    const nextAccount = {
-      ...account,
-      ...updatedUser,
-    };
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
 
-    localStorage.setItem("account", JSON.stringify(nextAccount));
-    window.dispatchEvent(new Event("accountUpdated"));
-
-    setAccount(nextAccount);
-    setOldPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
-
-    alert("Cập nhật thông tin thành công!");
+      toast.success("Cập nhật thông tin thành công!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Không thể cập nhật thông tin lúc này!");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (!account) return null;
@@ -140,7 +139,7 @@ export default function Profile() {
           <h1 style={{ fontSize: "34px", marginBottom: "8px" }}>
             Thông tin cá nhân
           </h1>
-          <p style={{ color: "#6b7280", marginBottom: "70px" }}>
+          <p style={{ color: "#6b7280", marginBottom: "40px" }}>
             Cập nhật họ tên hoặc thay đổi mật khẩu khi cần.
           </p>
 
@@ -148,7 +147,7 @@ export default function Profile() {
             <ProfileField label="Email">
               <input
                 type="text"
-                value={account.email}
+                value={account.email || ""}
                 readOnly
                 style={inputStyle}
               />
@@ -173,7 +172,7 @@ export default function Profile() {
                 placeholder="Nhập mật khẩu hiện tại"
                 style={inputStyle}
               />
-              <i className="fa-regular fa-eye" style={iconStyle}></i>
+              <i className="fa-solid fa-key" style={iconStyle}></i>
             </ProfileField>
 
             <ProfileField label="Mật khẩu mới">
@@ -184,7 +183,7 @@ export default function Profile() {
                 placeholder="8-31 ký tự, có chữ hoa, thường và số"
                 style={inputStyle}
               />
-              <i className="fa-regular fa-eye" style={iconStyle}></i>
+              <i className="fa-solid fa-lock-open" style={iconStyle}></i>
             </ProfileField>
 
             <ProfileField label="Xác nhận mật khẩu mới">
@@ -195,25 +194,30 @@ export default function Profile() {
                 placeholder="Nhập lại mật khẩu mới"
                 style={inputStyle}
               />
-              <i className="fa-regular fa-eye" style={iconStyle}></i>
+              <i className="fa-solid fa-check-double" style={iconStyle}></i>
             </ProfileField>
 
             <button
               type="submit"
+              disabled={submitting}
               style={{
                 marginTop: "22px",
                 width: "250px",
-                height: "54px",
+                height: "50px",
                 background: "#b91c1c",
                 color: "#fff",
                 border: "none",
                 borderRadius: "8px",
-                fontWeight: "800",
+                fontWeight: "700",
                 fontSize: "16px",
                 cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
               }}
             >
-              <i className="fa-solid fa-floppy-disk"></i> Lưu thay đổi
+              <i className="fa-solid fa-floppy-disk"></i> {submitting ? "Đang lưu..." : "Lưu thay đổi"}
             </button>
           </form>
         </div>
@@ -243,10 +247,10 @@ function ProfileField({ label, children }) {
 
 const inputStyle = {
   width: "100%",
-  height: "48px",
+  height: "46px",
   padding: "0 44px 0 14px",
   border: "1px solid #d1d5db",
-  borderRadius: "10px",
+  borderRadius: "8px",
   outline: "none",
   fontSize: "15px",
 };
@@ -256,5 +260,5 @@ const iconStyle = {
   right: "16px",
   top: "50%",
   transform: "translateY(-50%)",
-  color: "#6b7280",
+  color: "#9ca3af",
 };

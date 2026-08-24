@@ -2,15 +2,17 @@ import { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { createItem, getCollection, getItem } from "../services/api";
 import { getProductImage } from "../utils/productImages";
-import {
-  addCartItem,
-  getStoredAccount,
-  writeBuyNowCart,
-} from "../utils/cartStorage";
+import { writeBuyNowCart } from "../utils/cartStorage";
+import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
+import { useToast } from "../context/ToastContext";
 
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { account } = useAuth();
+  const { addToCart: addToCartContext } = useCart();
+  const toast = useToast();
 
   const [product, setProduct] = useState(null);
   const [brand, setBrand] = useState(null);
@@ -48,17 +50,17 @@ export default function ProductDetail() {
         setProduct(productData);
 
         const currentBrand =
-          brandsData.find((item) => String(item.id) === String(productData?.brandId)) || null;
+          (brandsData || []).find((item) => String(item.id) === String(productData?.brandId)) || null;
 
         const currentCategory =
-          categoriesData.find((item) => String(item.id) === String(productData?.categoryId)) ||
+          (categoriesData || []).find((item) => String(item.id) === String(productData?.categoryId)) ||
           null;
 
         setBrand(currentBrand);
         setCategory(currentCategory);
 
         setSimilarProducts(
-          productsData
+          (productsData || [])
             .filter(
               (item) =>
                 item.categoryId === productData?.categoryId &&
@@ -68,16 +70,16 @@ export default function ProductDetail() {
             .slice(0, 4),
         );
 
-        const productReviews = reviewsData.filter(
+        const productReviews = (reviewsData || []).filter(
           (review) => Number(review.productId) === Number(productData.id),
         );
 
         setReviews(productReviews);
 
-        const currentUser = getStoredAccount();
+        const currentUser = account;
 
         if (currentUser) {
-          const deliveredOrder = ordersData.find(
+          const deliveredOrder = (ordersData || []).find(
             (order) =>
               Number(order.userId) === Number(currentUser.id) &&
               order.status === "Đã giao hàng" &&
@@ -87,7 +89,7 @@ export default function ProductDetail() {
               ),
           );
 
-          const alreadyReviewed = reviewsData.some(
+          const alreadyReviewed = (reviewsData || []).some(
             (review) =>
               Number(review.userId) === Number(currentUser.id) &&
               Number(review.productId) === Number(productData.id),
@@ -104,10 +106,11 @@ export default function ProductDetail() {
     };
 
     fetchProductDetail();
-  }, [id]);
+  }, [id, account]);
 
   const addToCart = (goToCheckout = false) => {
-    if (!getStoredAccount()) {
+    if (!account) {
+      toast.warning("Vui lòng đăng nhập để tiến hành đặt hàng!");
       navigate("/login");
       return;
     }
@@ -117,34 +120,33 @@ export default function ProductDetail() {
       !Number.isFinite(quantity) ||
       quantity < 1
     ) {
-      alert("Số lượng mua phải là số nguyên dương!");
+      toast.error("Số lượng mua phải là số nguyên dương!");
       return;
     }
 
     if (product.status === "INACTIVE" || Number(product.stock) <= 0) {
-      alert("Sản phẩm hiện không còn được bán!");
+      toast.error("Sản phẩm hiện không còn được bán!");
       return;
     }
 
     if (quantity > Number(product.stock)) {
-      alert("Số lượng mua không được lớn hơn tồn kho!");
+      toast.warning(`Chỉ còn ${product.stock} sản phẩm trong kho!`);
       return;
     }
 
     if (goToCheckout) {
       writeBuyNowCart([{ productId: product.id, quantity }]);
-
       navigate("/checkout?type=buy-now");
       return;
     }
 
-    const result = addCartItem(product.id, quantity, product.stock);
+    const result = addToCartContext(product.id, quantity, product.stock);
     if (!result.ok) {
-      alert("Không thể thêm sản phẩm! Số lượng trong giỏ đã vượt tồn kho.");
+      toast.warning("Không thể thêm sản phẩm! Số lượng trong giỏ đã vượt tồn kho.");
       return;
     }
 
-    alert("Đã thêm sản phẩm vào giỏ hàng!");
+    toast.success(`Đã thêm ${quantity}x "${product.name}" vào giỏ hàng!`);
   };
 
   const handleQuantityChange = (e) => {
@@ -168,22 +170,22 @@ export default function ProductDetail() {
 
     if (reviewSubmitting) return;
 
-    const currentUser = getStoredAccount();
+    const currentUser = account;
 
     if (!currentUser) {
-      alert("Vui lòng đăng nhập để đánh giá sản phẩm!");
+      toast.warning("Vui lòng đăng nhập để đánh giá sản phẩm!");
       return;
     }
 
     if (!canReview) {
-      alert(
+      toast.warning(
         "Bạn chỉ có thể đánh giá sản phẩm đã giao thành công và chưa đánh giá.",
       );
       return;
     }
 
     if (comment.trim().length < 2 || comment.trim().length > 1000) {
-      alert("Bình luận phải có từ 2 đến 1000 ký tự!");
+      toast.error("Bình luận phải có từ 2 đến 1000 ký tự!");
       return;
     }
 
@@ -207,7 +209,7 @@ export default function ProductDetail() {
 
       if (!hasDeliveredProduct || reviewsData.length > 0) {
         setCanReview(false);
-        alert("Đơn hàng chưa đủ điều kiện hoặc sản phẩm đã được đánh giá!");
+        toast.warning("Đơn hàng chưa đủ điều kiện hoặc sản phẩm đã được đánh giá!");
         return;
       }
 
@@ -224,10 +226,10 @@ export default function ProductDetail() {
       setCanReview(false);
       setRating(5);
       setComment("");
-      alert("Gửi đánh giá thành công!");
+      toast.success("Cảm ơn bạn đã gửi đánh giá sản phẩm!");
     } catch (err) {
       console.error(err);
-      alert("Không thể gửi đánh giá lúc này!");
+      toast.error("Không thể gửi đánh giá lúc này!");
     } finally {
       setReviewSubmitting(false);
     }
@@ -236,7 +238,9 @@ export default function ProductDetail() {
   if (loading) {
     return (
       <main className="product-detail-page">
-        <div className="empty-similar">Đang tải dữ liệu...</div>
+        <div className="empty-similar">
+          <i className="fa-solid fa-spinner fa-spin"></i> Đang tải thông tin sản phẩm...
+        </div>
       </main>
     );
   }
@@ -246,7 +250,7 @@ export default function ProductDetail() {
       <main className="product-detail-page">
         <div className="empty-similar">
           <i className="fa-regular fa-circle-xmark"></i>
-          Không tìm thấy sản phẩm.
+          Không tìm thấy sản phẩm hoặc sản phẩm đã ngừng kinh doanh.
         </div>
       </main>
     );
@@ -338,7 +342,7 @@ export default function ProductDetail() {
               </div>
             ) : (
               <div className="rating-row">
-                <span className="review-count">Chưa có đánh giá</span>
+                <span className="review-count">Chưa có đánh giá nào</span>
               </div>
             )}
           </div>
@@ -356,7 +360,7 @@ export default function ProductDetail() {
 
             <span className="quantity-text">
               {product.stock > 0
-                ? `${product.stock} sản phẩm có sẵn`
+                ? `${product.stock} sản phẩm có sẵn trong kho`
                 : "Vui lòng quay lại sau"}
             </span>
           </div>
@@ -368,14 +372,14 @@ export default function ProductDetail() {
               </div>
 
               <div>
-                <span>Bảo hành chính hãng</span>
-                <strong>Hỗ trợ đổi trả theo chính sách ProBuild PC</strong>
+                <span>Bảo hành chính hãng 36 tháng</span>
+                <strong>1 đổi 1 trong 30 ngày nếu có lỗi kỹ thuật từ nhà sản xuất</strong>
               </div>
             </div>
 
             <div className="purchase-form">
               <label className="quantity-box">
-                <span>Số lượng</span>
+                <span>Số lượng:</span>
 
                 <input
                   className="quantity-input"
@@ -396,7 +400,7 @@ export default function ProductDetail() {
                   disabled={product.stock <= 0}
                 >
                   <i className="fa-solid fa-cart-shopping"></i>
-                  Thêm giỏ
+                  Thêm vào giỏ
                 </button>
 
                 <button
@@ -419,7 +423,7 @@ export default function ProductDetail() {
           <div className="description-title-row">
             <div>
               <h2>Mô tả sản phẩm</h2>
-              <span>Thông tin tổng quan và điểm nổi bật</span>
+              <span>Thông số chi tiết và ưu điểm vượt trội</span>
             </div>
 
             <i className="fa-solid fa-circle-info"></i>
@@ -438,8 +442,8 @@ export default function ProductDetail() {
         <div className="description-box">
           <div className="description-title-row">
             <div>
-              <h2>Đánh giá sản phẩm</h2>
-              <span>Nhận xét từ khách hàng đã mua sản phẩm</span>
+              <h2>Đánh giá từ khách hàng</h2>
+              <span>Nhận xét và trải nghiệm thực tế từ người dùng</span>
             </div>
 
             <i className="fa-solid fa-star"></i>
@@ -448,60 +452,66 @@ export default function ProductDetail() {
           {canReview && (
             <form
               onSubmit={handleSubmitReview}
-              style={{ marginBottom: "24px" }}
+              style={{
+                marginBottom: "24px",
+                background: "#f8fafc",
+                padding: "20px",
+                borderRadius: "10px",
+                border: "1px solid #e2e8f0",
+              }}
             >
-              <label style={{ fontWeight: "bold" }}>Chọn số sao</label>
+              <h4 style={{ marginBottom: "12px" }}>Đánh giá của bạn</h4>
+              <label style={{ fontWeight: "600", fontSize: "14px" }}>Chọn số sao hài lòng:</label>
 
               <select
                 value={rating}
                 onChange={(e) => setRating(e.target.value)}
                 style={{
                   display: "block",
-                  marginTop: "8px",
+                  marginTop: "6px",
                   marginBottom: "12px",
                   width: "160px",
                   height: "40px",
-                  borderRadius: "6px",
-                  border: "1px solid #ddd",
+                  borderRadius: "8px",
+                  border: "1.5px solid #cbd5e1",
                   padding: "0 10px",
+                  fontWeight: "600",
                 }}
               >
-                <option value="5">5 sao</option>
-                <option value="4">4 sao</option>
-                <option value="3">3 sao</option>
-                <option value="2">2 sao</option>
-                <option value="1">1 sao</option>
+                <option value="5">★★★★★ (5 sao - Tuyệt vời)</option>
+                <option value="4">★★★★☆ (4 sao - Hài lòng)</option>
+                <option value="3">★★★☆☆ (3 sao - Bình thường)</option>
+                <option value="2">★★☆☆☆ (2 sao - Chưa tốt)</option>
+                <option value="1">★☆☆☆☆ (1 sao - Rất tệ)</option>
               </select>
 
               <textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                placeholder="Nhập bình luận của bạn..."
+                placeholder="Chia sẻ cảm nhận chi tiết về hiệu năng, đóng gói, giao hàng..."
                 rows="4"
                 style={{
                   width: "100%",
                   padding: "12px",
                   borderRadius: "8px",
-                  border: "1px solid #ddd",
+                  border: "1.5px solid #cbd5e1",
                   resize: "vertical",
+                  fontFamily: "inherit",
                 }}
               />
 
               <button
                 type="submit"
                 disabled={reviewSubmitting}
+                className="btn-submit"
                 style={{
                   marginTop: "12px",
-                  padding: "10px 20px",
-                  background: "#ed1c24",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "6px",
-                  fontWeight: "bold",
-                  cursor: "pointer",
+                  width: "auto",
+                  padding: "10px 24px",
+                  borderRadius: "8px",
                 }}
               >
-                {reviewSubmitting ? "Đang gửi..." : "Gửi đánh giá"}
+                {reviewSubmitting ? "Đang gửi..." : "Gửi đánh giá ngay"}
               </button>
             </form>
           )}
@@ -511,24 +521,28 @@ export default function ProductDetail() {
               <div
                 key={review.id}
                 style={{
-                  padding: "14px 0",
-                  borderBottom: "1px solid #eee",
+                  padding: "16px 0",
+                  borderBottom: "1px solid #f1f5f9",
                 }}
               >
-                <strong>{review.userName}</strong>
+                <strong style={{ fontSize: "15px", color: "#0f172a" }}>{review.userName}</strong>
 
-                <div style={{ color: "#f59e0b", margin: "4px 0" }}>
+                <div style={{ color: "#f59e0b", margin: "4px 0", fontSize: "16px" }}>
                   {"★".repeat(review.rating)}
                   {"☆".repeat(5 - review.rating)}
                 </div>
 
-                <p>{review.comment}</p>
+                <p style={{ color: "#334155", margin: "6px 0" }}>{review.comment}</p>
 
-                <small>{new Date(review.date).toLocaleString("vi-VN")}</small>
+                <small style={{ color: "#94a3b8" }}>
+                  {new Date(review.date).toLocaleString("vi-VN")}
+                </small>
               </div>
             ))
           ) : (
-            <p>Chưa có đánh giá nào cho sản phẩm này.</p>
+            <p style={{ color: "#64748b", fontStyle: "italic", padding: "10px 0" }}>
+              Chưa có đánh giá nào cho sản phẩm này. Hãy là người đầu tiên đánh giá sau khi nhận hàng!
+            </p>
           )}
         </div>
       </section>
@@ -538,7 +552,7 @@ export default function ProductDetail() {
           <h2>Sản phẩm cùng danh mục</h2>
           <p>
             {category
-              ? `Các lựa chọn khác trong ${category.name}`
+              ? `Các linh kiện khác trong nhóm "${category.name}"`
               : "Các lựa chọn liên quan"}
           </p>
         </div>

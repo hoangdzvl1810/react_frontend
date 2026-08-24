@@ -1,0 +1,345 @@
+/* Admin App Layout */
+.admin-app-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f4f6f9;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Admin Sidebar */
+.admin-sidebar {
+  width: 260px;
+  min-width: 260px;
+  background: #1e293b;
+  color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+  z-index: 100;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.admin-sidebar-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.admin-sidebar-header .logo-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: unset;
+}
+
+.admin-sidebar-header .logo-icon {
+  width: auto;
+  height: auto;
+  font-size: 32px;
+  line-height: 1;
+  color: #ed1c24;
+  font-weight: 900;
+}
+
+.admin-sidebar-header .logo-box h2 {
+  font-size: 19px;
+  color: #ed1c24;
+  margin: 0;
+  line-height: 1.1;
+  font-weight: 800;
+}
+
+.admin-sidebar-header .logo-box h2 span {
+  color: #ffffff;
+}
+
+.admin-sidebar-header .logo-box p {
+  margin: 0;
+  font-size: 9px;
+  color: #94a3b8;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.admin-nav-section-title {
+  padding: 16px 24px 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #94a3b8;
+}
+
+.admin-sidebar-nav {
+  flex: 1;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+}
+
+.admin-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  color: #cbd5e1;
+  text-decoration: none;
+  font-size: 0.92rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.admin-nav-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  transform: translateX(3px);
+}
+
+.admin-nav-item.active {
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.admin-nav-item .nav-icon {
+  font-size: 1.1rem;
+}
+
+.admin-sidebar-footer {
+  padding: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #0f172a;
+}
+
+.admin-back-store-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  color: #e2e8f0;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.admin-back-store-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
+
+.admin-user-profile-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 4px;
+}
+
+.admin-user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #3b82f6;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.admin-user-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-user-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-user-role {
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+.admin-logout-btn {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  color: #94a3b8;
+  transition: all 0.2s;
+}
+
+.admin-logout-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+/* Admin Main Container */
+.admin-main-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.admin-topbar {
+  height: 60px;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.admin-topbar-breadcrumb {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.admin-topbar-actions .user-dropdown {
+  position: relative;
+  display: inline-block;
+  z-index: 1000;
+}
+
+.admin-topbar-actions .dropdown-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: background 0.2s;
+  color: inherit;
+}
+
+.admin-topbar-actions .dropdown-toggle:hover {
+  background: #f1f5f9;
+}
+
+.admin-topbar-actions .user-icon {
+  color: #ed1c24;
+  font-size: 26px;
+  line-height: 1;
+}
+
+.admin-topbar-actions .user-info-text h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  text-align: left;
+}
+
+.admin-topbar-actions .user-info-text p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: #64748b;
+  text-align: left;
+}
+
+.admin-topbar-actions .dropdown-menu {
+  display: none !important;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  min-width: 200px;
+  margin-top: 8px;
+  padding: 6px 0;
+  border-radius: 8px;
+  background-color: #ffffff;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  z-index: 9999 !important;
+}
+
+.admin-topbar-actions .user-dropdown:hover .dropdown-menu,
+.admin-topbar-actions .user-dropdown:focus-within .dropdown-menu {
+  display: block !important;
+}
+
+.admin-topbar-actions .dropdown-menu a,
+.admin-topbar-actions .dropdown-menu button {
+  color: #334155;
+  padding: 10px 16px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s;
+}
+
+.admin-topbar-actions .dropdown-menu a:hover,
+.admin-topbar-actions .dropdown-menu button:hover {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+.admin-topbar-actions .dropdown-menu button.logout {
+  color: #ef4444;
+  border-top: 1px solid #f1f5f9;
+  margin-top: 4px;
+  padding-top: 10px;
+}
+
+.admin-topbar-actions .dropdown-menu button.logout:hover {
+  background-color: #fef2f2;
+  color: #dc2626;
+}
+
+.admin-content-area {
+  flex: 1;
+  padding: 24px;
+}
+
+@media (max-width: 900px) {
+  .admin-app-layout {
+    flex-direction: column;
+  }
+  .admin-sidebar {
+    width: 100%;
+    height: auto;
+    position: static;
+  }
+}

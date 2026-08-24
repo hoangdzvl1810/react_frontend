@@ -59,7 +59,7 @@
     {
       "id": "10",
       "name": "Chuột",
-      "status": "ACTIVE"
+      "status": "INACTIVE"
     }
   ],
   "brands": [
@@ -129,7 +129,7 @@
       "id": "1",
       "name": "AMD Ryzen 5 7600",
       "price": 5500000,
-      "stock": 19,
+      "stock": 0,
       "categoryId": 1,
       "brandId": 1,
       "image": "amd-ryzen-5-7600.jpg",
@@ -184,7 +184,7 @@
       "id": "6",
       "name": "MSI GeForce RTX 4060 Ventus 2X",
       "price": 9500000,
-      "stock": 46,
+      "stock": 45,
       "categoryId": 4,
       "brandId": 6,
       "image": "msi-rtx-4060-ventus-2x.jpg",
@@ -426,7 +426,7 @@
       "id": "28",
       "name": "Logitech G502 Hero",
       "price": 1100000,
-      "stock": 10,
+      "stock": 9,
       "categoryId": 10,
       "brandId": 10,
       "image": "logitech-g502-hero.jpg",
@@ -500,14 +500,21 @@
       "email": "chammeof1401@gmail.com",
       "password": "Cham1234",
       "role": "CUSTOMER",
-      "id": "UFSlSiNkP5E"
+      "id": "8"
     },
     {
       "fullName": "Cham",
       "email": "caytaogai958@gmail.com",
       "password": "Cham1234",
       "role": "CUSTOMER",
-      "id": "MeakTeU4H3I"
+      "id": "9"
+    },
+    {
+      "fullName": "Bùi Minh Hoàng",
+      "email": "hoang.bm2005@gmail.com",
+      "password": "hoang.bm2005@gmail.comA",
+      "role": "CUSTOMER",
+      "id": "10"
     }
   ],
   "orders": [
@@ -554,9 +561,9 @@
       "address": "thôn 3",
       "phone": "0912345678",
       "totalPrice": 236500000,
-      "status": "Đang xử lý",
+      "status": "Đã giao hàng",
       "paymentMethod": "COD",
-      "paymentStatus": "Chưa thanh toán",
+      "paymentStatus": "Đã thanh toán",
       "stockRestored": false,
       "date": "2026-07-07T05:25:18.586Z",
       "items": [
@@ -573,7 +580,21 @@
           "quantity": 43
         }
       ],
-      "id": "2"
+      "id": "2",
+      "updatedAt": "2026-08-24T02:48:42.039Z",
+      "statusHistory": [
+        {
+          "status": "Đang giao hàng",
+          "changedAt": "2026-08-24T02:48:30.311Z",
+          "changedBy": "1"
+        },
+        {
+          "status": "Đã giao hàng",
+          "changedAt": "2026-08-24T02:48:42.039Z",
+          "changedBy": "1"
+        }
+      ],
+      "deliveredAt": "2026-08-24T02:48:42.039Z"
     },
     {
       "userId": 5,
@@ -685,6 +706,193 @@
         }
       ],
       "id": 6
+    },
+    {
+      "userId": "5",
+      "customerName": "Phạm Thu Trang",
+      "address": "111111111111",
+      "phone": "0911111111",
+      "totalPrice": 9500000,
+      "status": "Đang xử lý",
+      "paymentMethod": "COD",
+      "paymentStatus": "Chưa thanh toán",
+      "stockRestored": false,
+      "date": "2026-07-22T15:37:27.850Z",
+      "updatedAt": "2026-07-22T15:37:27.850Z",
+      "statusHistory": [
+        {
+          "status": "Đang xử lý",
+          "changedAt": "2026-07-22T15:37:27.850Z",
+          "changedBy": "5"
+        }
+      ],
+      "items": [
+        {
+          "productId": "6",
+          "productName": "MSI GeForce RTX 4060 Ventus 2X",
+          "unitPrice": 9500000,
+          "quantity": 1,
+          "lineTotal": 9500000
+        }
+      ],
+      "id": 7
+    },
+    {
+      "userId": "5",
+      "customerName": "Phạm Thu Trang",
+      "address": "Hà Nội, Việt Nam",
+      "phone": "0912345466",
+      "note": "",
+      "totalPrice": 8500000,
+      "status": "Đã hủy",
+      "paymentMethod": "COD",
+      "paymentStatus": "Chưa thanh toán",
+      "stockRestored": true,
+      "date": "2026-08-24T03:27:29.160Z",
+      "updatedAt": "2026-08-24T03:27:52.799Z",
+      "statusHistory": [
+        {
+          "status": "Đang xử lý",
+          "changedAt": "2026-08-24T03:27:29.160Z",
+          "changedBy": "5"
+        },
+        {
+          "status": "Đã hủy",
+          "changedAt": "2026-08-24T03:27:52.799Z",
+          "changedBy": "1"
+        }
+      ],
+      "items": [
+        {
+          "productId": "2",
+          "productName": "AMD Ryzen 7 7700X",
+          "image": "amd-ryzen-7-7700x.jpg",
+          "unitPrice": 8500000,
+          "quantity": 1,
+          "lineTotal": 8500000
+        }
+      ],
+      "id": 8,
+      "cancelledAt": "2026-08-24T03:27:52.799Z"
+    },
+    {
+      "userId": "5",
+      "customerName": "Phạm Thu Trang",
+      "address": "Hà Nội, Việt Nam",
+      "phone": "0911111111",
+      "note": "",
+      "totalPrice": 5500000,
+      "status": "Đã hủy",
+      "paymentMethod": "COD",
+      "paymentStatus": "Chưa thanh toán",
+      "stockRestored": true,
+      "date": "2026-08-24T03:29:11.033Z",
+      "updatedAt": "2026-08-24T03:29:32.307Z",
+      "statusHistory": [
+        {
+          "status": "Đang xử lý",
+          "changedAt": "2026-08-24T03:29:11.033Z",
+          "changedBy": "5"
+        },
+        {
+          "status": "Đã hủy",
+          "changedAt": "2026-08-24T03:29:32.307Z",
+          "changedBy": "1"
+        }
+      ],
+      "items": [
+        {
+          "productId": "1",
+          "productName": "AMD Ryzen 5 7600",
+          "image": "amd-ryzen-5-7600.jpg",
+          "unitPrice": 5500000,
+          "quantity": 1,
+          "lineTotal": 5500000
+        }
+      ],
+      "id": 9,
+      "cancelledAt": "2026-08-24T03:29:32.307Z"
+    },
+    {
+      "userId": "5",
+      "customerName": "Phạm Thu Trang",
+      "address": "Hà Nội, Việt Nam",
+      "phone": "0911111111",
+      "note": "",
+      "totalPrice": 104500000,
+      "status": "Đã hủy",
+      "paymentMethod": "COD",
+      "paymentStatus": "Chưa thanh toán",
+      "stockRestored": true,
+      "date": "2026-08-24T03:30:18.913Z",
+      "updatedAt": "2026-08-24T03:30:54.047Z",
+      "statusHistory": [
+        {
+          "status": "Đang xử lý",
+          "changedAt": "2026-08-24T03:30:18.913Z",
+          "changedBy": "5"
+        },
+        {
+          "status": "Đã hủy",
+          "changedAt": "2026-08-24T03:30:54.047Z",
+          "changedBy": "1"
+        }
+      ],
+      "items": [
+        {
+          "productId": "1",
+          "productName": "AMD Ryzen 5 7600",
+          "image": "amd-ryzen-5-7600.jpg",
+          "unitPrice": 5500000,
+          "quantity": 19,
+          "lineTotal": 104500000
+        }
+      ],
+      "id": 10,
+      "cancelledAt": "2026-08-24T03:30:54.047Z"
+    },
+    {
+      "userId": "5",
+      "customerName": "Phạm Thu Trang",
+      "address": "AMD Ryzen 5 7600",
+      "phone": "0911111111",
+      "note": "",
+      "totalPrice": 104500000,
+      "status": "Đã giao hàng",
+      "paymentMethod": "COD",
+      "paymentStatus": "Đã thanh toán",
+      "stockRestored": false,
+      "date": "2026-08-24T07:02:04.288Z",
+      "updatedAt": "2026-08-24T07:03:07.136Z",
+      "statusHistory": [
+        {
+          "status": "Đang xử lý",
+          "changedAt": "2026-08-24T07:02:04.288Z",
+          "changedBy": "5"
+        },
+        {
+          "status": "Đang giao hàng",
+          "changedAt": "2026-08-24T07:03:01.936Z",
+          "changedBy": "1"
+        },
+        {
+          "status": "Đã giao hàng",
+          "changedAt": "2026-08-24T07:03:07.136Z",
+          "changedBy": "1"
+        }
+      ],
+      "items": [
+        {
+          "productId": "1",
+          "productName": "AMD Ryzen 5 7600",
+          "image": "amd-ryzen-5-7600.jpg",
+          "unitPrice": 5500000,
+          "quantity": 19,
+          "lineTotal": 104500000
+        }
+      ],
+      "id": "11",
+      "deliveredAt": "2026-08-24T07:03:07.136Z"
     }
   ],
   "cart": []

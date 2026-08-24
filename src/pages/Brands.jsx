@@ -1,57 +1,75 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { getCollection } from "../services/api";
 import { getProductImage } from "../utils/productImages";
-import { addCartItem, getStoredAccount } from "../utils/cartStorage";
+import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
+import { useToast } from "../context/ToastContext";
+import Pagination from "../components/Pagination";
+
+const PAGE_SIZE = 16;
 
 const SORT_OPTIONS = {
   default: "Mặc định",
   priceAsc: "Giá thấp đến cao",
   priceDesc: "Giá cao đến thấp",
+  nameAsc: "Tên A - Z",
+  nameDesc: "Tên Z - A",
 };
 
 export default function Brands() {
   const navigate = useNavigate();
-  const [brands, setBrands] = useState([]);
+  const { account } = useAuth();
+  const { addToCart: addToCartContext } = useCart();
+  const toast = useToast();
+
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const brandId = searchParams.get("id") || "";
+  const brandId = searchParams.get("id") || searchParams.get("brand") || "";
+  const categoryId = searchParams.get("category") || searchParams.get("categoryId") || "";
   const priceRange = searchParams.get("price") || "";
   const keyword = searchParams.get("keyword") || "";
   const sort = searchParams.get("sort") || "default";
 
-  // Tải các thương hiệu, danh mục và sản phẩm đang hoạt động.
+  // Reset page whenever any filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [brandId, categoryId, priceRange, keyword, sort]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
 
-        const brandsData = await getCollection("brands");
-        const categoriesData = await getCollection("categories");
-        const productsData = await getCollection("products");
+        const [categoriesData, brandsData, productsData] = await Promise.all([
+          getCollection("categories"),
+          getCollection("brands"),
+          getCollection("products"),
+        ]);
 
-        const activeBrands = brandsData.filter(
-          (brand) => brand.status !== "INACTIVE",
+        const activeCategories = (categoriesData || []).filter(
+          (category) => category.status !== "INACTIVE"
+        );
+        const activeBrands = (brandsData || []).filter(
+          (brand) => brand.status !== "INACTIVE"
         );
 
-        const activeCategories = categoriesData.filter(
-          (category) => category.status !== "INACTIVE",
-        );
+        const activeCategoryIds = activeCategories.map((c) => String(c.id));
+        const activeBrandIds = activeBrands.map((b) => String(b.id));
 
-        const activeBrandIds = activeBrands.map((brand) => brand.id);
-        const activeCategoryIds = activeCategories.map(
-          (category) => category.id,
-        );
-
-        const activeProducts = productsData.filter(
+        const activeProducts = (productsData || []).filter(
           (product) =>
             product.status !== "INACTIVE" &&
-            activeBrandIds.includes(String(product.brandId)) &&
-            activeCategoryIds.includes(String(product.categoryId)),
+            activeCategoryIds.includes(String(product.categoryId)) &&
+            (activeBrandIds.length === 0 || activeBrandIds.includes(String(product.brandId)))
         );
 
+        setCategories(activeCategories);
         setBrands(activeBrands);
         setProducts(activeProducts);
       } catch (err) {
@@ -64,113 +82,228 @@ export default function Brands() {
     fetchData();
   }, []);
 
-  const selectedBrand = brands.find((item) => String(item.id) === brandId);
+  const selectedBrand = useMemo(
+    () => brands.find((item) => String(item.id) === String(brandId)),
+    [brands, brandId]
+  );
 
-  // Lọc và sắp xếp sản phẩm theo các tham số trên URL.
-  const getFilteredProducts = () => {
+  const selectedCategory = useMemo(
+    () => categories.find((item) => String(item.id) === String(categoryId)),
+    [categories, categoryId]
+  );
+
+  const filteredProducts = useMemo(() => {
     const normalizedKeyword = keyword.trim().toLowerCase();
 
     let result = products.filter((product) => {
-      const matchBrand = !brandId || String(product.brandId) === brandId;
+      const matchBrand =
+        !brandId || String(product.brandId) === String(brandId);
+
+      const matchCategory =
+        !categoryId || String(product.categoryId) === String(categoryId);
 
       const matchPrice =
         !priceRange ||
-        (priceRange === "0-5" &&
-          product.price >= 0 &&
-          product.price <= 5000000) ||
-        (priceRange === "5-10" &&
-          product.price > 5000000 &&
-          product.price <= 10000000) ||
+        (priceRange === "0-5" && product.price >= 0 && product.price <= 5000000) ||
+        (priceRange === "5-10" && product.price > 5000000 && product.price <= 10000000) ||
         (priceRange === "10+" && product.price > 10000000);
 
       const matchKeyword =
         !normalizedKeyword ||
-        product.name.toLowerCase().includes(normalizedKeyword) ||
+        product.name?.toLowerCase().includes(normalizedKeyword) ||
         product.description?.toLowerCase().includes(normalizedKeyword);
 
-      return matchBrand && matchPrice && matchKeyword;
+      return matchBrand && matchCategory && matchPrice && matchKeyword;
     });
 
-    result = [...result].sort((a, b) => {
+    return result.sort((a, b) => {
       if (sort === "priceAsc") return a.price - b.price;
       if (sort === "priceDesc") return b.price - a.price;
+      if (sort === "nameAsc") return a.name.localeCompare(b.name);
+      if (sort === "nameDesc") return b.name.localeCompare(a.name);
       return a.id - b.id;
     });
+  }, [products, brandId, categoryId, priceRange, keyword, sort]);
 
-    return result;
-  };
-
-  const filteredProducts = getFilteredProducts();
-
-  // Cập nhật bộ lọc trên URL mà không làm mất tham số khác.
   const updateParam = (key, value) => {
     const nextParams = new URLSearchParams(searchParams);
-
     if (value) {
       nextParams.set(key, value);
     } else {
       nextParams.delete(key);
     }
-
+    // Clean redundant keys if any
+    if (key === "brand") nextParams.delete("id");
+    if (key === "id") nextParams.delete("brand");
     setSearchParams(nextParams);
   };
 
   const handleSearch = (e) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    updateParam("keyword", formData.get("keyword").trim());
+    updateParam("keyword", formData.get("keyword")?.trim());
   };
 
   const clearFilters = () => {
     setSearchParams({});
   };
 
-  const heading = selectedBrand
-    ? `Thương hiệu ${selectedBrand.name}`
-    : "Thương hiệu sản phẩm";
-
-  // Kiểm tra tồn kho trước khi thêm sản phẩm vào giỏ.
-  const addToCart = (product) => {
-    if (!getStoredAccount()) {
+  const handleAddToCart = (product) => {
+    if (!account) {
+      toast.warning("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!");
       navigate("/login");
       return;
     }
 
     if (product.status === "INACTIVE" || Number(product.stock) <= 0) {
-      alert("Sản phẩm đã hết hàng hoặc ngừng bán.");
+      toast.error("Sản phẩm đã hết hàng hoặc ngừng bán.");
       return;
     }
 
-    const result = addCartItem(product.id, 1, product.stock);
+    const result = addToCartContext(product.id, 1, product.stock);
     if (!result.ok) {
-      alert("Số lượng trong giỏ đã đạt mức tồn kho tối đa.");
+      toast.warning("Số lượng trong giỏ đã đạt mức tồn kho tối đa.");
       return;
     }
 
-    alert("Đã thêm sản phẩm vào giỏ hàng!");
+    toast.success(`Đã thêm "${product.name}" vào giỏ hàng!`);
   };
+
+  const totalPages = Math.ceil(filteredProducts.length / PAGE_SIZE);
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredProducts.slice(start, start + PAGE_SIZE);
+  }, [filteredProducts, currentPage]);
+
+  const heading = keyword
+    ? `Tìm kiếm trong thương hiệu: "${keyword}"`
+    : selectedBrand && selectedCategory
+    ? `${selectedBrand.name} - ${selectedCategory.name}`
+    : selectedBrand
+    ? `Thương hiệu ${selectedBrand.name}`
+    : selectedCategory
+    ? `Linh kiện ${selectedCategory.name}`
+    : "Tất cả thương hiệu chính hãng";
 
   return (
     <main className="brand-page">
       <nav className="brand-breadcrumb">
         <Link to="/">Trang chủ</Link>
         <span>/</span>
-        <strong>Thương hiệu</strong>
+        <Link to="/brands">Thương hiệu</Link>
+        {selectedBrand && (
+          <>
+            <span>/</span>
+            <strong>{selectedBrand.name}</strong>
+          </>
+        )}
+        {selectedCategory && (
+          <>
+            <span>/</span>
+            <strong>{selectedCategory.name}</strong>
+          </>
+        )}
       </nav>
 
       <header className="brand-heading">
         <div>
           <h1>{heading}</h1>
           <p>
-            {priceRange ? `Khoảng giá ${priceRange} · ` : ""}
-            {filteredProducts.length} sản phẩm phù hợp
+            Khám phá linh kiện máy tính chính hãng từ các thương hiệu hàng đầu thế giới
           </p>
         </div>
       </header>
 
       <div className="brand-layout">
-        {/* Bộ lọc khoảng giá. */}
+        {/* Sidebar Bộ lọc */}
         <aside className="brand-sidebar">
+          {/* Bộ lọc Thương hiệu */}
+          <div className="filter-panel">
+            <div className="filter-title">
+              <h2>Thương hiệu</h2>
+            </div>
+
+            <label className={!brandId ? "is-checked" : ""}>
+              <input
+                type="radio"
+                name="brand-filter"
+                checked={!brandId}
+                onChange={() => updateParam("brand", "")}
+              />
+              Tất cả thương hiệu
+              <span style={{ marginLeft: "auto", fontSize: "12px", color: "#94a3b8" }}>
+                ({products.length})
+              </span>
+            </label>
+
+            {brands.map((brand) => {
+              const count = products.filter(
+                (p) => String(p.brandId) === String(brand.id)
+              ).length;
+              return (
+                <label
+                  className={brandId === String(brand.id) ? "is-checked" : ""}
+                  key={brand.id}
+                >
+                  <input
+                    type="radio"
+                    name="brand-filter"
+                    checked={brandId === String(brand.id)}
+                    onChange={() => updateParam("brand", String(brand.id))}
+                  />
+                  {brand.name}
+                  <span style={{ marginLeft: "auto", fontSize: "12px", color: "#94a3b8" }}>
+                    ({count})
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+
+          {/* Bộ lọc Danh mục linh kiện */}
+          <div className="filter-panel">
+            <div className="filter-title">
+              <h2>Danh mục linh kiện</h2>
+            </div>
+
+            <label className={!categoryId ? "is-checked" : ""}>
+              <input
+                type="radio"
+                name="category-filter"
+                checked={!categoryId}
+                onChange={() => updateParam("category", "")}
+              />
+              Tất cả linh kiện
+            </label>
+
+            {categories.map((category) => {
+              const count = products.filter(
+                (p) =>
+                  (!brandId || String(p.brandId) === String(brandId)) &&
+                  String(p.categoryId) === String(category.id)
+              ).length;
+
+              return (
+                <label
+                  className={categoryId === String(category.id) ? "is-checked" : ""}
+                  key={category.id}
+                >
+                  <input
+                    type="radio"
+                    name="category-filter"
+                    checked={categoryId === String(category.id)}
+                    onChange={() => updateParam("category", String(category.id))}
+                  />
+                  {category.name}
+                  <span style={{ marginLeft: "auto", fontSize: "12px", color: "#94a3b8" }}>
+                    ({count})
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+
+          {/* Bộ lọc Khoảng giá */}
           <div className="filter-panel">
             <div className="filter-title">
               <h2>Khoảng giá</h2>
@@ -179,79 +312,77 @@ export default function Brands() {
             <label className={!priceRange ? "is-checked" : ""}>
               <input
                 type="radio"
+                name="brand-price"
                 checked={!priceRange}
                 onChange={() => updateParam("price", "")}
               />
-              Tất cả
+              Tất cả mức giá
             </label>
 
             <label className={priceRange === "0-5" ? "is-checked" : ""}>
               <input
                 type="radio"
+                name="brand-price"
                 checked={priceRange === "0-5"}
                 onChange={() => updateParam("price", "0-5")}
               />
-              Từ 0 - 5 triệu
+              Dưới 5 triệu
             </label>
 
             <label className={priceRange === "5-10" ? "is-checked" : ""}>
               <input
                 type="radio"
+                name="brand-price"
                 checked={priceRange === "5-10"}
                 onChange={() => updateParam("price", "5-10")}
               />
-              Từ 5 - 10 triệu
+              5 - 10 triệu
             </label>
 
             <label className={priceRange === "10+" ? "is-checked" : ""}>
               <input
                 type="radio"
+                name="brand-price"
                 checked={priceRange === "10+"}
                 onChange={() => updateParam("price", "10+")}
               />
               Trên 10 triệu
             </label>
 
-            <button type="button" onClick={clearFilters}>
-              Xóa bộ lọc
-            </button>
+            {(brandId || categoryId || priceRange || keyword) && (
+              <button
+                type="button"
+                className="clear-filter-btn"
+                onClick={clearFilters}
+                style={{
+                  marginTop: "12px",
+                  padding: "8px 12px",
+                  background: "#fee2e2",
+                  color: "#ef4444",
+                  border: "1px solid #fca5a5",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  width: "100%",
+                  fontWeight: "600",
+                }}
+              >
+                ✕ Xóa tất cả bộ lọc
+              </button>
+            )}
           </div>
         </aside>
 
+        {/* Nội dung danh sách sản phẩm */}
         <section className="brand-content">
-          {/* Danh sách chọn nhanh thương hiệu. */}
-          <div className="brand-strip">
-            <Link
-              className={`brand-card view-all ${!brandId ? "active" : ""}`}
-              to="/brands"
-            >
-              <span style={{color:"blue"}}><b>Tất cả</b></span> 
-            </Link>
-
-            {brands.map((brand) => (
-              <Link
-                key={brand.id}
-                className={`brand-card ${
-                  brandId === String(brand.id) ? "active" : ""
-                }`}
-                to={`/brands?id=${brand.id}`}
-              >
-                <span className="brand-name">{brand.name}</span>
-              </Link>
-            ))}
-          </div>
-
           <div className="brand-result-head">
             <div>
               <h2>
-                Danh sách sản phẩm
-                <span> ({filteredProducts.length})</span>
+                Danh sách sản phẩm <span>({filteredProducts.length})</span>
               </h2>
-
               <p>
                 {loading
                   ? "Đang tải dữ liệu..."
-                  : "Lọc sản phẩm theo thương hiệu."}
+                  : "Tìm thấy " + filteredProducts.length + " sản phẩm"}
               </p>
             </div>
 
@@ -260,23 +391,23 @@ export default function Brands() {
               onSubmit={handleSearch}
             >
               <input
+                key={keyword}
                 type="text"
-                defaultValue={keyword}
                 name="keyword"
-                placeholder="Tìm sản phẩm..."
+                defaultValue={keyword}
+                placeholder="Tìm tên hoặc mô tả linh kiện..."
               />
-
-              <button type="submit">Tìm kiếm</button>
+              <button type="submit">Tìm</button>
             </form>
 
             <label>
-              Sắp xếp
+              Sắp xếp:
               <select
                 value={sort}
                 onChange={(e) => updateParam("sort", e.target.value)}
               >
                 {Object.entries(SORT_OPTIONS).map(([value, label]) => (
-                  <option key={value} value={value}>
+                  <option value={value} key={value}>
                     {label}
                   </option>
                 ))}
@@ -284,32 +415,39 @@ export default function Brands() {
             </label>
           </div>
 
-          <section className="brand-product-grid product-grid">
+          <section className="brand-product-grid">
             {loading ? (
               <div className="brand-empty">
                 <h3>Đang tải sản phẩm...</h3>
+                <p>Vui lòng chờ trong giây lát.</p>
               </div>
-            ) : filteredProducts.length > 0 ? (
-              filteredProducts.map((product) => (
-                <article className="product-card" key={product.id}>
-                  <figure>
+            ) : paginatedProducts.length > 0 ? (
+              paginatedProducts.map((product) => (
+                <article className="brand-product-card" key={product.id}>
+                  <Link
+                    className="brand-product-image"
+                    to={`/product-detail/${product.id}`}
+                  >
                     <img
                       src={getProductImage(product.image)}
                       alt={product.name}
+                      onError={(e) =>
+                        (e.target.src = "https://via.placeholder.com/200")
+                      }
                     />
-                  </figure>
+                  </Link>
 
-                  <h3>{product.name}</h3>
+                  <h3>
+                    <Link to={`/product-detail/${product.id}`}>
+                      {product.name}
+                    </Link>
+                  </h3>
 
-                  <strong>{product.price.toLocaleString("vi-VN")}đ</strong>
+                  <strong>{Number(product.price).toLocaleString("vi-VN")}đ</strong>
 
-                  <p
-                    className={`product-stock ${
-                      product.stock > 0 ? "in-stock" : "out-of-stock"
-                    }`}
-                  >
-                    {product.stock > 0
-                      ? `Còn hàng: ${product.stock}`
+                  <p className="stock">
+                    {Number(product.stock) > 0
+                      ? `Còn hàng (${product.stock} sp)`
                       : "Hết hàng"}
                   </p>
 
@@ -318,14 +456,15 @@ export default function Brands() {
                       className="detail-btn"
                       to={`/product-detail/${product.id}`}
                     >
-                      Xem chi tiết
+                      Chi tiết
                     </Link>
 
                     <button
                       className="cart-btn"
                       type="button"
-                      disabled={product.stock <= 0}
-                      onClick={() => addToCart(product)}
+                      disabled={Number(product.stock) <= 0}
+                      onClick={() => handleAddToCart(product)}
+                      title="Thêm vào giỏ hàng"
                     >
                       <i className="fa-solid fa-cart-shopping"></i>
                     </button>
@@ -334,10 +473,40 @@ export default function Brands() {
               ))
             ) : (
               <div className="brand-empty">
-                <h3>Không tìm thấy sản phẩm</h3>
+                <h3>Không tìm thấy sản phẩm phù hợp</h3>
+                <p>Thử chọn thương hiệu khác hoặc xóa bớt tiêu chí lọc.</p>
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  style={{
+                    marginTop: "10px",
+                    padding: "8px 16px",
+                    background: "#ed1c24",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    fontWeight: "600",
+                  }}
+                >
+                  Xem tất cả sản phẩm
+                </button>
               </div>
             )}
           </section>
+
+          {!loading && filteredProducts.length > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={filteredProducts.length}
+              pageSize={PAGE_SIZE}
+              onPageChange={(page) => {
+                setCurrentPage(page);
+                window.scrollTo({ top: 180, behavior: "smooth" });
+              }}
+            />
+          )}
         </section>
       </div>
     </main>

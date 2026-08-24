@@ -1,10 +1,12 @@
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 import Header from './Header';
 import Footer from './Footer';
 
 export default function Layout() {
     const location = useLocation();
+    const { isAdmin } = useAuth();
 
     useEffect(() => {
         const path = location.pathname;
@@ -30,6 +32,11 @@ export default function Layout() {
             document.body.className = '';
         }
     }, [location.pathname]);
+
+    // Admin không cho về trang customer/home, tự động chuyển hướng vào dashboard (ngoại trừ trang profile)
+    if (isAdmin && location.pathname !== '/profile') {
+        return <Navigate to="/dashboard" replace />;
+    }
 
     return (
         <div>

@@ -1,26 +1,40 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getCollection } from "../services/api";
 import { getProductImage } from "../utils/productImages";
-import { addCartItem, getStoredAccount } from "../utils/cartStorage";
+import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
+import { useToast } from "../context/ToastContext";
+import Pagination from "../components/Pagination";
+
+const PAGE_SIZE = 16;
 
 export default function Home() {
   const navigate = useNavigate();
+  const { account } = useAuth();
+  const { addToCart: addToCartContext } = useCart();
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const toast = useToast();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const categoriesData = await getCollection("categories");
-        const brandsData = await getCollection("brands");
-        const productsData = await getCollection("products");
+        setLoading(true);
+        const [categoriesData, brandsData, productsData] = await Promise.all([
+          getCollection("categories"),
+          getCollection("brands"),
+          getCollection("products"),
+        ]);
 
-        const activeCategories = categoriesData.filter(
+        const activeCategories = (categoriesData || []).filter(
           (category) => category.status !== "INACTIVE",
         );
 
-        const activeBrands = brandsData.filter(
+        const activeBrands = (brandsData || []).filter(
           (brand) => brand.status !== "INACTIVE",
         );
 
@@ -29,41 +43,52 @@ export default function Home() {
         );
         const activeBrandIds = activeBrands.map((brand) => String(brand.id));
 
-        const activeProducts = productsData.filter(
+        const activeProducts = (productsData || []).filter(
           (product) =>
             product.status !== "INACTIVE" &&
             activeCategoryIds.includes(String(product.categoryId)) &&
-            activeBrandIds.includes(String(product.brandId)),
+            (activeBrandIds.length === 0 || activeBrandIds.includes(String(product.brandId))),
         );
 
         setCategories(activeCategories);
         setProducts(activeProducts);
       } catch (error) {
         console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchData();
   }, []);
+
   const addToCart = (product) => {
-    if (!getStoredAccount()) {
+    if (!account) {
+      toast.warning("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!");
       navigate("/login");
       return;
     }
 
     if (product.status === "INACTIVE" || Number(product.stock) <= 0) {
-      alert("Sản phẩm đã hết hàng hoặc ngừng bán.");
+      toast.error("Sản phẩm đã hết hàng hoặc ngừng kinh doanh.");
       return;
     }
 
-    const result = addCartItem(product.id, 1, product.stock);
+    const result = addToCartContext(product.id, 1, product.stock);
     if (!result.ok) {
-      alert("Số lượng trong giỏ đã đạt mức tồn kho tối đa.");
+      toast.warning("Số lượng trong giỏ hàng đã đạt mức tồn kho tối đa!");
       return;
     }
 
-    alert("Đã thêm sản phẩm vào giỏ hàng!");
+    toast.success(`Đã thêm "${product.name}" vào giỏ hàng!`);
   };
+
+  const totalPages = Math.ceil(products.length / PAGE_SIZE);
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return products.slice(start, start + PAGE_SIZE);
+  }, [products, currentPage]);
+
   return (
     <main className="page-shell">
       <aside className="sidebar">
@@ -77,7 +102,7 @@ export default function Home() {
         </ul>
 
         <Link className="all-categories" to="/categories">
-          ▦ Xem tất cả danh mục
+          ▦ Xem tất cả sản phẩm
         </Link>
       </aside>
 
@@ -101,7 +126,7 @@ export default function Home() {
             </span>
             <div>
               <strong>Hàng chính hãng</strong>
-              <small>100% chính hãng</small>
+              <small>100% linh kiện phân phối chính hãng</small>
             </div>
           </article>
 
@@ -111,7 +136,7 @@ export default function Home() {
             </span>
             <div>
               <strong>Bảo hành uy tín</strong>
-              <small>Bảo hành chính hãng</small>
+              <small>Bảo hành tận nơi lên đến 36 tháng</small>
             </div>
           </article>
 
@@ -121,7 +146,7 @@ export default function Home() {
             </span>
             <div>
               <strong>Giao hàng toàn quốc</strong>
-              <small>Miễn phí đơn từ 1 triệu</small>
+              <small>Miễn phí giao hàng từ 1 triệu</small>
             </div>
           </article>
 
@@ -131,33 +156,39 @@ export default function Home() {
             </span>
             <div>
               <strong>Hỗ trợ 24/7</strong>
-              <small>Tư vấn tận tâm</small>
+              <small>Kỹ thuật viên tư vấn tận tâm</small>
             </div>
           </article>
         </section>
 
         <section className="product-grid">
-          {products.length > 0 ? (
-            products.map((product) => (
+          {loading ? (
+            <p style={{ textAlign: "center", gridColumn: "1 / -1", padding: "40px", color: "#64748b" }}>
+              Đang tải danh sách linh kiện...
+            </p>
+          ) : paginatedProducts.length > 0 ? (
+            paginatedProducts.map((product) => (
               <article className="product-card" key={product.id}>
                 <figure>
                   <img
                     src={getProductImage(product.image)}
                     alt={product.name}
-                    
+                    onError={(e) =>
+                      (e.target.src = "https://via.placeholder.com/200")
+                    }
                   />
                 </figure>
 
                 <h3>{product.name}</h3>
-                <strong>{product.price.toLocaleString("vi-VN")}đ</strong>
+                <strong>{Number(product.price).toLocaleString("vi-VN")}đ</strong>
 
                 <p
                   className={`product-stock ${
-                    product.stock > 0 ? "in-stock" : "out-of-stock"
+                    Number(product.stock) > 0 ? "in-stock" : "out-of-stock"
                   }`}
                 >
-                  {product.stock > 0
-                    ? `Còn hàng: ${product.stock}`
+                  {Number(product.stock) > 0
+                    ? `Còn hàng: ${product.stock} sp`
                     : "Hết hàng"}
                 </p>
 
@@ -171,8 +202,10 @@ export default function Home() {
 
                   <button
                     className="cart-btn"
-                    disabled={product.stock <= 0}
+                    disabled={Number(product.stock) <= 0}
                     onClick={() => addToCart(product)}
+                    type="button"
+                    title="Thêm vào giỏ hàng"
                   >
                     <i className="fa-solid fa-cart-shopping"></i>
                   </button>
@@ -185,6 +218,19 @@ export default function Home() {
             </p>
           )}
         </section>
+
+        {!loading && products.length > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={products.length}
+            pageSize={PAGE_SIZE}
+            onPageChange={(page) => {
+              setCurrentPage(page);
+              window.scrollTo({ top: 400, behavior: "smooth" });
+            }}
+          />
+        )}
       </section>
     </main>
   );

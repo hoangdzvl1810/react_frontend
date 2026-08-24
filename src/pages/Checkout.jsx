@@ -1,31 +1,38 @@
-import { useEffect, useRef, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect, useRef, useState, useMemo } from "react";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { createItem, getCollection, updateItem } from "../services/api";
 import {
   clearBuyNowCart,
-  clearCart,
-  getStoredAccount,
   readBuyNowCart,
   readCart,
 } from "../utils/cartStorage";
+import { getProductImage } from "../utils/productImages";
+import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
+import { useToast } from "../context/ToastContext";
 
 const normalizeAddress = (value) => value.trim().replace(/\s+/g, " ");
 const normalizePhone = (value) => value.replace(/\s+/g, "");
 const isVietnamesePhone = (value) => /^0(3|5|7|8|9)\d{8}$/.test(value);
 
 export default function Checkout() {
+  const { account } = useAuth();
+  const { clearCart } = useCart();
   const [cart, setCart] = useState([]);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(account);
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
+  const [note, setNote] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("COD");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const checkoutLock = useRef(false);
+
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isBuyNow = searchParams.get("type") === "buy-now";
+  const toast = useToast();
 
   useEffect(() => {
     let active = true;
@@ -53,7 +60,7 @@ export default function Checkout() {
 
         if (active) {
           setCart(hydratedCart);
-          setUser(getStoredAccount());
+          setUser(account);
         }
       } catch (err) {
         console.error(err);
@@ -67,12 +74,14 @@ export default function Checkout() {
     return () => {
       active = false;
     };
-  }, [isBuyNow]);
+  }, [isBuyNow, account]);
 
-  const total = cart.reduce(
-    (sum, item) => sum + Number(item.price) * Number(item.quantity),
-    0,
-  );
+  const total = useMemo(() => {
+    return cart.reduce(
+      (sum, item) => sum + Number(item.price) * Number(item.quantity),
+      0
+    );
+  }, [cart]);
 
   const rollbackStocks = async (adjustedProducts) => {
     await Promise.allSettled(
@@ -86,9 +95,9 @@ export default function Checkout() {
     e.preventDefault();
     if (checkoutLock.current) return;
 
-    const currentUser = getStoredAccount();
+    const currentUser = account;
     if (!currentUser || currentUser.role !== "CUSTOMER") {
-      alert("Vui lòng đăng nhập bằng tài khoản khách hàng để thanh toán!");
+      toast.warning("Vui lòng đăng nhập bằng tài khoản khách hàng để thanh toán!");
       navigate("/login");
       return;
     }
@@ -97,17 +106,17 @@ export default function Checkout() {
     const normalizedPhone = normalizePhone(phone);
 
     if (normalizedAddress.length < 10 || normalizedAddress.length > 200) {
-      alert("Địa chỉ giao hàng phải có từ 10 đến 200 ký tự!");
+      toast.error("Địa chỉ giao hàng phải có từ 10 đến 200 ký tự!");
       return;
     }
 
     if (!isVietnamesePhone(normalizedPhone)) {
-      alert("Số điện thoại Việt Nam không hợp lệ!");
+      toast.error("Số điện thoại Việt Nam không hợp lệ (VD: 0912345678)!");
       return;
     }
 
     if (!cart.length) {
-      alert("Giỏ hàng không có sản phẩm hợp lệ!");
+      toast.error("Giỏ hàng không có sản phẩm hợp lệ!");
       return;
     }
 
@@ -145,6 +154,7 @@ export default function Checkout() {
           product,
           productId: product.id,
           productName: product.name,
+          image: product.image,
           unitPrice,
           quantity,
           lineTotal: unitPrice * quantity,
@@ -170,11 +180,12 @@ export default function Checkout() {
         customerName: currentUser.fullName,
         address: normalizedAddress,
         phone: normalizedPhone,
+        note: note.trim(),
         totalPrice: verifiedTotal,
         status: "Đang xử lý",
         paymentMethod,
         paymentStatus:
-          paymentMethod === "COD" ? "Chưa thanh toán" : "Chờ thanh toán",
+          paymentMethod === "COD" ? "Chưa thanh toán" : "Chờ xác nhận",
         stockRestored: false,
         date: now,
         updatedAt: now,
@@ -186,9 +197,10 @@ export default function Checkout() {
           },
         ],
         items: preparedItems.map(
-          ({ productId, productName, unitPrice, quantity, lineTotal }) => ({
+          ({ productId, productName, image, unitPrice, quantity, lineTotal }) => ({
             productId,
             productName,
+            image,
             unitPrice,
             quantity,
             lineTotal,
@@ -200,14 +212,14 @@ export default function Checkout() {
       if (isBuyNow) clearBuyNowCart();
       else clearCart();
 
-      alert("Đặt hàng thành công!");
+      toast.success("Đặt hàng thành công! Cảm ơn bạn đã mua sắm tại ProBuild PC.");
       navigate("/order-history");
     } catch (err) {
       console.error(err);
       if (!orderCreated && adjustedProducts.length) {
         await rollbackStocks(adjustedProducts);
       }
-      alert(err.message || "Có lỗi xảy ra khi đặt hàng.");
+      toast.error(err.message || "Có lỗi xảy ra khi đặt hàng.");
     } finally {
       checkoutLock.current = false;
       setSubmitting(false);
@@ -215,157 +227,231 @@ export default function Checkout() {
   };
 
   if (loading) {
-    return <div style={{ padding: "50px", textAlign: "center" }}>Đang tải...</div>;
+    return (
+      <div className="checkout-page-wrap">
+        <div style={{ padding: "80px", textAlign: "center", color: "#64748b" }}>
+          <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: "32px", marginBottom: "12px" }}></i>
+          <p>Đang chuẩn bị trang thanh toán...</p>
+        </div>
+      </div>
+    );
   }
 
   if (!cart.length) {
     return (
-      <div style={{ padding: "50px", textAlign: "center" }}>
-        {error || "Giỏ hàng trống, không thể thanh toán!"}
+      <div className="checkout-page-wrap">
+        <div className="cart-empty-panel">
+          <i className="fa-solid fa-cart-shopping cart-empty-icon"></i>
+          <h2>Không có sản phẩm nào để thanh toán!</h2>
+          <p>{error || "Vui lòng chọn sản phẩm vào giỏ hàng trước khi đặt hàng."}</p>
+          <Link
+            to="/categories"
+            className="cart-checkout-btn"
+            style={{ display: "inline-block", width: "auto", padding: "12px 28px" }}
+          >
+            Quay lại cửa hàng
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div
-      style={{
-        padding: "40px",
-        maxWidth: "800px",
-        margin: "0 auto",
-        minHeight: "60vh",
-      }}
-    >
-      <h2 style={{ marginBottom: "20px" }}>Thông tin người nhận hàng</h2>
-      {error && <p style={{ color: "#dc3545" }}>{error}</p>}
+    <main className="checkout-page-wrap">
+      <div className="checkout-header-title">
+        <h1>Thanh Toán Đơn Hàng</h1>
+        <p>Vui lòng điền thông tin nhận hàng và chọn phương thức thanh toán.</p>
+      </div>
 
-      <div
-        style={{
-          backgroundColor: "#fff",
-          padding: "30px",
-          borderRadius: "10px",
-          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-        }}
-      >
-        <form
-          onSubmit={handleCheckout}
-          style={{ display: "flex", flexDirection: "column", gap: "20px" }}
-        >
-          <div className="form-group">
-            <label>Họ và tên</label>
-            <input
-              type="text"
-              value={user?.fullName || ""}
-              readOnly
-              className="search-input"
-              style={{ width: "100%", backgroundColor: "#f0f0f0" }}
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Địa chỉ giao hàng (*)</label>
-            <input
-              type="text"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              required
-              minLength="10"
-              maxLength="200"
-              className="search-input"
-              style={{ width: "100%" }}
-              placeholder="Ví dụ: 123 Đường ABC, Quận XYZ..."
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Số điện thoại liên hệ (*)</label>
-            <input
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              required
-              maxLength="12"
-              inputMode="numeric"
-              className="search-input"
-              style={{ width: "100%" }}
-              placeholder="Ví dụ: 0912345678"
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Phương thức thanh toán</label>
-            <select
-              value={paymentMethod}
-              onChange={(e) => setPaymentMethod(e.target.value)}
-              className="search-input"
-              style={{ width: "100%" }}
-            >
-              <option value="COD">Thanh toán khi nhận hàng (COD)</option>
-              <option value="BANK_TRANSFER">Chuyển khoản ngân hàng</option>
-            </select>
-          </div>
-
-          <div style={{ marginTop: "10px" }}>
-            <h3 style={{ marginBottom: "12px" }}>Sản phẩm đặt mua</h3>
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                marginBottom: "20px",
-              }}
-            >
-              <thead>
-                <tr style={{ borderBottom: "2px solid #eee", textAlign: "left" }}>
-                  <th style={{ padding: "10px" }}>Sản phẩm</th>
-                  <th>Đơn giá</th>
-                  <th>Số lượng</th>
-                  <th>Thành tiền</th>
-                </tr>
-              </thead>
-              <tbody>
-                {cart.map((item) => (
-                  <tr key={item.id} style={{ borderBottom: "1px solid #eee" }}>
-                    <td style={{ padding: "10px", fontWeight: "600" }}>
-                      {item.name}
-                    </td>
-                    <td>{Number(item.price).toLocaleString("vi-VN")}đ</td>
-                    <td>{item.quantity}</td>
-                    <td style={{ color: "#ed1c24", fontWeight: "bold" }}>
-                      {(Number(item.price) * Number(item.quantity)).toLocaleString(
-                        "vi-VN",
-                      )}
-                      đ
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div
-            style={{
-              borderTop: "2px solid #eee",
-              marginTop: "10px",
-              paddingTop: "20px",
-              textAlign: "right",
-            }}
-          >
-            <h3 style={{ fontSize: "24px", marginBottom: "15px" }}>
-              Tổng thanh toán:{" "}
-              <span style={{ color: "#e53e3e" }}>
-                {total.toLocaleString("vi-VN")}đ
-              </span>
+      <form onSubmit={handleCheckout}>
+        <div className="checkout-layout-grid">
+          {/* Left Column: Form Details */}
+          <div className="checkout-form-panel">
+            <h3 className="checkout-section-title">
+              <i className="fa-solid fa-location-dot"></i> Thông tin giao hàng
             </h3>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "16px" }}>
+              <div>
+                <label className="modal-field-label">Người nhận hàng</label>
+                <input
+                  type="text"
+                  value={user?.fullName || ""}
+                  readOnly
+                  className="modal-input"
+                  style={{ background: "#f8fafc", color: "#64748b" }}
+                />
+              </div>
+
+              <div>
+                <label className="modal-field-label">Số điện thoại (*)</label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  required
+                  maxLength="12"
+                  placeholder="VD: 0912345678"
+                  className="modal-input"
+                />
+              </div>
+            </div>
+
+            <div style={{ marginBottom: "16px" }}>
+              <label className="modal-field-label">Địa chỉ nhận hàng (*)</label>
+              <input
+                type="text"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                required
+                minLength="10"
+                maxLength="200"
+                placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố..."
+                className="modal-input"
+              />
+            </div>
+
+            <div style={{ marginBottom: "24px" }}>
+              <label className="modal-field-label">Ghi chú giao hàng (Tùy chọn)</label>
+              <textarea
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="Giao giờ hành chính, gọi trước khi giao..."
+                style={{
+                  width: "100%",
+                  minHeight: "70px",
+                  padding: "10px 14px",
+                  borderRadius: "8px",
+                  border: "1.5px solid #cbd5e1",
+                  fontFamily: "inherit",
+                  fontSize: "14px",
+                }}
+              />
+            </div>
+
+            <h3 className="checkout-section-title">
+              <i className="fa-solid fa-wallet"></i> Phương thức thanh toán
+            </h3>
+
+            <div className="payment-method-selector">
+              <div
+                className={`payment-option-card ${paymentMethod === "COD" ? "selected" : ""}`}
+                onClick={() => setPaymentMethod("COD")}
+              >
+                <strong>
+                  <i className="fa-solid fa-hand-holding-dollar"></i> Thanh toán COD
+                </strong>
+                <small>Thanh toán bằng tiền mặt khi shipper giao hàng</small>
+              </div>
+
+              <div
+                className={`payment-option-card ${paymentMethod === "BANK_TRANSFER" ? "selected" : ""}`}
+                onClick={() => setPaymentMethod("BANK_TRANSFER")}
+              >
+                <strong>
+                  <i className="fa-solid fa-building-columns"></i> Chuyển khoản QR
+                </strong>
+                <small>Chuyển khoản ngân hàng 24/7 qua mã VietQR</small>
+              </div>
+            </div>
+
+            {paymentMethod === "BANK_TRANSFER" && (
+              <div className="bank-info-box">
+                <p>
+                  <strong>Ngân hàng:</strong> MB Bank (Quân Đội)
+                </p>
+                <p>
+                  <strong>Số tài khoản:</strong> <code>0988889999</code>
+                </p>
+                <p>
+                  <strong>Chủ tài khoản:</strong> CÔNG TY PROBUILD PC VIỆT NAM
+                </p>
+                <p>
+                  <strong>Nội dung CK:</strong> <code>PROBUILD {phone || user?.id || "ORDER"}</code>
+                </p>
+                <small style={{ color: "#64748b", display: "block", marginTop: "6px" }}>
+                  * Đơn hàng sẽ được nhân viên xác nhận ngay sau khi nhận được chuyển khoản.
+                </small>
+              </div>
+            )}
+          </div>
+
+          {/* Right Column: Order Summary */}
+          <aside className="checkout-summary-card">
+            <h3 className="summary-title">Đơn hàng của bạn ({cart.length} món)</h3>
+
+            <div style={{ maxHeight: "240px", overflowY: "auto", marginBottom: "16px", paddingRight: "4px" }}>
+              {cart.map((item) => (
+                <div
+                  key={item.id}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    padding: "8px 0",
+                    borderBottom: "1px solid #f1f5f9",
+                  }}
+                >
+                  <img
+                    src={getProductImage(item.image)}
+                    alt={item.name}
+                    style={{ width: "40px", height: "40px", borderRadius: "6px", objectFit: "contain" }}
+                  />
+                  <div style={{ flex: 1, fontSize: "13px" }}>
+                    <div style={{ fontWeight: "600", color: "#1e293b" }}>{item.name}</div>
+                    <div style={{ color: "#64748b" }}>
+                      Số lượng: <strong>x{item.quantity}</strong>
+                    </div>
+                  </div>
+                  <div style={{ fontWeight: "700", color: "#dc2626", fontSize: "13px" }}>
+                    {(Number(item.price) * Number(item.quantity)).toLocaleString("vi-VN")}đ
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="summary-line">
+              <span>Tạm tính</span>
+              <strong>{total.toLocaleString("vi-VN")}đ</strong>
+            </div>
+
+            <div className="summary-line">
+              <span>Phí vận chuyển</span>
+              <span style={{ color: "#16a34a", fontWeight: "700" }}>Miễn phí</span>
+            </div>
+
+            <div className="summary-line total-line">
+              <span>Tổng thanh toán</span>
+              <span className="grand-price">{total.toLocaleString("vi-VN")}đ</span>
+            </div>
+
             <button
               type="submit"
-              className="btn-submit"
-              style={{ width: "250px" }}
-              disabled={submitting || Boolean(error)}
+              className="cart-checkout-btn"
+              disabled={submitting}
             >
-              {submitting ? "Đang tạo đơn..." : "Xác nhận đặt hàng"}
+              {submitting ? (
+                <span>
+                  <i className="fa-solid fa-spinner fa-spin"></i> Đang xử lý...
+                </span>
+              ) : (
+                <span>
+                  <i className="fa-solid fa-check"></i> Xác nhận đặt hàng
+                </span>
+              )}
             </button>
-          </div>
-        </form>
-      </div>
-    </div>
+
+            <div className="trust-badges">
+              <div className="trust-item">
+                <i className="fa-solid fa-lock"></i> Bảo mật thanh toán SSL 256-bit
+              </div>
+              <div className="trust-item">
+                <i className="fa-solid fa-box"></i> Đóng gói chống sốc chuyên dụng
+              </div>
+            </div>
+          </aside>
+        </div>
+      </form>
+    </main>
   );
 }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { createItem, getCollection } from "../services/api";
-import { moveGuestCartToUser } from "../utils/cartStorage";
+import { useAuth } from "../context/AuthContext";
 import emailjs from '@emailjs/browser';
 
 export default function Register() {
@@ -23,6 +23,7 @@ export default function Register() {
   const [generatedOtp, setGeneratedOtp] = useState("");
   const [otpExpiredTime, setOtpExpiredTime] = useState(null);
 
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -103,10 +104,10 @@ export default function Register() {
 
       try {
         await emailjs.send(
-          'service_8vqxkne', // TODO: Thay thế bằng Service ID của bạn từ EmailJS
-          'template_cwrgi0w', // TODO: Thay thế bằng Template ID của bạn từ EmailJS
+          'service_o5krgnr',
+          'template_f6ilju8', 
           templateParams,
-          '5AT0YF71xdtAJ2wsE' // TODO: Thay thế bằng Public Key của bạn từ EmailJS
+          'MkQTJJanpQbaDaVVZ'
         );
         console.log("Đã gửi email OTP thành công qua EmailJS");
       } catch (emailError) {
@@ -149,14 +150,12 @@ export default function Register() {
         role: "CUSTOMER",
       });
 
-      moveGuestCartToUser(newUser.id);
-      localStorage.setItem("account", JSON.stringify(newUser));
+      login(newUser);
       setSuccess("Đăng ký thành công! Đang chuyển về trang chủ...");
 
       setTimeout(() => {
         navigate("/");
-        window.location.reload();
-      }, 700);
+      }, 500);
     } catch (err) {
       setError("Không thể đăng ký lúc này. Vui lòng thử lại.");
     } finally {

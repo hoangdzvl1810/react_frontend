@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { createItem, getCollection, updateItem } from "../services/api";
 import { getNextNumericId } from "../utils/getNextNumericId";
+import { useToast } from "../context/ToastContext";
+import { PromptModal, ConfirmModal } from "../components/Modal";
+import Pagination from "../components/Pagination";
+
+const ITEMS_PER_PAGE = 9;
 
 export default function AdminBrands() {
   const [brands, setBrands] = useState([]);
@@ -9,17 +14,30 @@ export default function AdminBrands() {
   const [sort, setSort] = useState("");
   const [name, setName] = useState("");
   const [keyword, setKeyword] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Modals state
+  const [editNameModal, setEditNameModal] = useState({ isOpen: false, brand: null });
+  const [toggleStatusModal, setToggleStatusModal] = useState({ isOpen: false, brand: null });
+
+  const toast = useToast();
 
   useEffect(() => {
     loadData();
   }, []);
 
   const loadData = async () => {
-    const brandsData = await getCollection("brands");
-    const productsData = await getCollection("products");
+    try {
+      const [brandsData, productsData] = await Promise.all([
+        getCollection("brands"),
+        getCollection("products"),
+      ]);
 
-    setBrands(brandsData);
-    setProducts(productsData);
+      setBrands(brandsData || []);
+      setProducts(productsData || []);
+    } catch (e) {
+      toast.error("Không thể tải danh sách thương hiệu.");
+    }
   };
 
   const productCountByBrand = useMemo(() => {
@@ -29,25 +47,44 @@ export default function AdminBrands() {
     }, {});
   }, [products]);
 
-  const sortedBrands = [...brands]
-    .filter((brand) =>
-      brand.name.toLowerCase().includes(keyword.trim().toLowerCase()),
-    )
-    .sort((a, b) => {
-      const countA = productCountByBrand[a.id] || 0;
-      const countB = productCountByBrand[b.id] || 0;
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [keyword, sort]);
 
-      if (sort === "productDesc") return countB - countA;
-      if (sort === "productAsc") return countA - countB;
-      return a.id - b.id;
-    });
+  const sortedBrands = useMemo(() => {
+    return [...brands]
+      .filter((brand) =>
+        brand.name.toLowerCase().includes(keyword.trim().toLowerCase())
+      )
+      .sort((a, b) => {
+        const countA = productCountByBrand[a.id] || 0;
+        const countB = productCountByBrand[b.id] || 0;
+
+        if (sort === "productDesc") return countB - countA;
+        if (sort === "productAsc") return countA - countB;
+        return a.id - b.id;
+      });
+  }, [brands, keyword, sort, productCountByBrand]);
+
+  const totalPages = Math.ceil(sortedBrands.length / ITEMS_PER_PAGE) || 1;
+
+  const paginatedBrands = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return sortedBrands.slice(start, start + ITEMS_PER_PAGE);
+  }, [sortedBrands, currentPage]);
+
   const handleAddBrand = async (e) => {
     e.preventDefault();
+
+    if (/\s{2,}/.test(name)) {
+      toast.error("Tên thương hiệu không được chứa nhiều dấu cách liên tiếp! Vui lòng nhập lại.");
+      return;
+    }
 
     const trimmedName = name.trim();
 
     if (trimmedName === "") {
-      alert("Tên thương hiệu không được để trống!");
+      toast.error("Tên thương hiệu không được để trống!");
       return;
     }
 
@@ -56,71 +93,98 @@ export default function AdminBrands() {
     );
 
     if (isDuplicate) {
-      alert("Tên thương hiệu đã tồn tại trong hệ thống!");
+      toast.error("Tên thương hiệu đã tồn tại trong hệ thống!");
       return;
     }
 
-    const createdBrand = await createItem("brands", {
-      id: getNextNumericId(brands),
-      name: trimmedName,
-      status: "ACTIVE",
-    });
+    try {
+      const createdBrand = await createItem("brands", {
+        id: getNextNumericId(brands),
+        name: trimmedName,
+        status: "ACTIVE",
+      });
 
-    setBrands([...brands, createdBrand]);
-    setName("");
-    setShowForm(false);
-
-    alert("Thêm thương hiệu thành công!");
+      setBrands([...brands, createdBrand]);
+      setName("");
+      setShowForm(false);
+      toast.success("Thêm thương hiệu thành công!");
+    } catch (err) {
+      toast.error("Không thể thêm thương hiệu!");
+    }
   };
 
-  const handleEditName = async (brand) => {
-    const newName = window.prompt("Nhập tên thương hiệu mới:", brand.name);
+  const handleEditNameConfirm = async (newName) => {
+    const { brand } = editNameModal;
+    if (!brand) return;
 
-    if (newName === null) return;
+    if (/\s{2,}/.test(newName)) {
+      toast.error("Tên thương hiệu không được chứa nhiều dấu cách liên tiếp! Vui lòng nhập lại.");
+      return;
+    }
+
+    setEditNameModal({ isOpen: false, brand: null });
 
     const trimmedNewName = newName.trim();
 
     if (trimmedNewName === "") {
-      alert("Tên thương hiệu không được để trống!");
+      toast.error("Tên thương hiệu không được để trống!");
       return;
     }
 
     if (trimmedNewName === brand.name) return;
 
     const isDuplicate = brands.some(
-      (b) => b.id !== brand.id && b.name.trim().toLowerCase() === trimmedNewName.toLowerCase()
+      (b) =>
+        b.id !== brand.id &&
+        b.name.trim().toLowerCase() === trimmedNewName.toLowerCase()
     );
 
     if (isDuplicate) {
-      alert("Tên thương hiệu này đã tồn tại trong hệ thống!");
+      toast.error("Tên thương hiệu này đã tồn tại trong hệ thống!");
       return;
     }
 
-    const updatedBrand = await updateItem("brands", brand.id, {
-      name: trimmedNewName,
-    });
+    try {
+      const updatedBrand = await updateItem("brands", brand.id, {
+        name: trimmedNewName,
+      });
 
-    setBrands(
-      brands.map((item) =>
-        item.id === brand.id ? { ...item, ...updatedBrand } : item,
-      ),
-    );
+      setBrands(
+        brands.map((item) =>
+          item.id === brand.id ? { ...item, ...updatedBrand } : item
+        )
+      );
 
-    alert("Cập nhật tên thương hiệu thành công!");
+      toast.success("Cập nhật tên thương hiệu thành công!");
+    } catch (error) {
+      toast.error("Không thể cập nhật tên thương hiệu!");
+    }
   };
 
-  const handleToggleStatus = async (brand) => {
+  const handleToggleStatusConfirm = async () => {
+    const { brand } = toggleStatusModal;
+    if (!brand) return;
+    setToggleStatusModal({ isOpen: false, brand: null });
+
     const nextStatus = brand.status === "INACTIVE" ? "ACTIVE" : "INACTIVE";
 
-    const updatedBrand = await updateItem("brands", brand.id, {
-      status: nextStatus,
-    });
+    try {
+      const updatedBrand = await updateItem("brands", brand.id, {
+        status: nextStatus,
+      });
 
-    setBrands(
-      brands.map((item) =>
-        item.id === brand.id ? { ...item, ...updatedBrand } : item,
-      ),
-    );
+      setBrands(
+        brands.map((item) =>
+          item.id === brand.id ? { ...item, ...updatedBrand } : item
+        )
+      );
+
+      toast.success(
+        `Đã ${nextStatus === "ACTIVE" ? "kích hoạt" : "vô hiệu hóa"} thương hiệu "${brand.name}"`
+      );
+    } catch (err) {
+      toast.error("Không thể cập nhật trạng thái thương hiệu!");
+    }
   };
 
   return (
@@ -140,11 +204,17 @@ export default function AdminBrands() {
           borderBottom: "2px solid #eee",
           paddingBottom: "15px",
           gap: "12px",
+          flexWrap: "wrap",
         }}
       >
-        <h2>Quản Lý Thương Hiệu</h2>
-
         <div>
+          <h2>Quản Lý Thương Hiệu ({brands.length})</h2>
+          <p style={{ color: "#64748b", marginTop: "4px", fontSize: "14px" }}>
+            Quản lý các hãng đối tác công nghệ và linh kiện.
+          </p>
+        </div>
+
+        <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
           <input
             type="text"
             value={keyword}
@@ -152,11 +222,11 @@ export default function AdminBrands() {
             placeholder="Tìm kiếm theo tên..."
             style={{
               height: "42px",
-              width: "240px",
+              width: "220px",
               padding: "0 12px",
-              borderRadius: "6px",
-              border: "1px solid #ddd",
-              fontWeight: "bold",
+              borderRadius: "8px",
+              border: "1.5px solid #cbd5e1",
+              fontSize: "14px",
             }}
           />
           <select
@@ -165,23 +235,33 @@ export default function AdminBrands() {
             style={{
               height: "42px",
               padding: "0 12px",
-              marginRight: "12px",
-              borderRadius: "6px",
-              border: "1px solid #ddd",
-              fontWeight: "bold",
+              borderRadius: "8px",
+              border: "1.5px solid #cbd5e1",
+              fontWeight: "600",
+              fontSize: "14px",
+              background: "#fff",
             }}
           >
             <option value="">Sắp xếp mặc định</option>
-            <option value="productDesc">Nhiều mặt hàng nhất</option>
-            <option value="productAsc">Ít mặt hàng nhất</option>
+            <option value="productDesc">Nhiều sản phẩm nhất</option>
+            <option value="productAsc">Ít sản phẩm nhất</option>
           </select>
 
           <button
+            type="button"
             onClick={() => setShowForm(!showForm)}
             className="btn-submit"
-            style={{ width: "auto", padding: "10px 20px" }}
+            style={{
+              width: "auto",
+              padding: "10px 18px",
+              borderRadius: "8px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
           >
-            {showForm ? "Đóng Form" : "+ Thêm Thương Hiệu"}
+            <i className={showForm ? "fa-solid fa-xmark" : "fa-solid fa-plus"}></i>
+            {showForm ? "Đóng form" : "Thêm thương hiệu"}
           </button>
         </div>
       </div>
@@ -193,31 +273,28 @@ export default function AdminBrands() {
             marginTop: "20px",
             background: "#fff",
             padding: "20px",
-            borderRadius: "8px",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+            borderRadius: "10px",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
             display: "flex",
             gap: "12px",
+            border: "1px solid #e2e8f0",
           }}
         >
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Nhập tên thương hiệu"
-            style={{
-              flex: 1,
-              height: "42px",
-              padding: "0 12px",
-              border: "1px solid #ddd",
-              borderRadius: "6px",
-            }}
+            placeholder="Nhập tên thương hiệu (VD: MSI, Intel, AMD)..."
+            required
+            className="modal-input"
+            style={{ flex: 1 }}
           />
 
           <button
             type="submit"
             className="btn-submit"
-            style={{ width: "180px" }}
+            style={{ width: "160px", borderRadius: "8px" }}
           >
-            Lưu
+            <i className="fa-solid fa-floppy-disk"></i> Lưu
           </button>
         </form>
       )}
@@ -229,59 +306,63 @@ export default function AdminBrands() {
           marginTop: "20px",
           backgroundColor: "#fff",
           boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-          borderRadius: "8px",
+          borderRadius: "10px",
           overflow: "hidden",
         }}
       >
         <thead>
           <tr
             style={{
-              backgroundColor: "#f8f9fa",
+              backgroundColor: "#f8fafc",
               textAlign: "left",
-              borderBottom: "2px solid #dee2e6",
+              borderBottom: "2px solid #e2e8f0",
             }}
           >
-            <th style={{ padding: "15px" }}>ID</th>
+            <th style={{ padding: "14px 16px" }}>ID</th>
             <th>Tên thương hiệu</th>
             <th>Số sản phẩm</th>
             <th>Trạng thái</th>
-            <th>Thao tác</th>
+            <th style={{ textAlign: "center" }}>Thao tác</th>
           </tr>
         </thead>
 
         <tbody>
-          {sortedBrands.map((brand) => (
-            <tr key={brand.id} style={{ borderBottom: "1px solid #eee" }}>
-              <td style={{ padding: "15px", fontWeight: "bold" }}>
-                {brand.id}
+          {paginatedBrands.map((brand) => (
+            <tr key={brand.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
+              <td style={{ padding: "14px 16px", fontWeight: "bold" }}>
+                #{brand.id}
               </td>
 
-              <td style={{ fontWeight: "600" }}>{brand.name}</td>
+              <td style={{ fontWeight: "600", fontSize: "15px" }}>
+                {brand.name}
+              </td>
 
               <td>
                 <span
                   style={{
-                    padding: "4px 10px",
-                    background: "#e7f1ff",
-                    color: "#0d6efd",
-                    borderRadius: "12px",
-                    fontWeight: "bold",
+                    padding: "4px 12px",
+                    background: "#dbeafe",
+                    color: "#1d4ed8",
+                    borderRadius: "6px",
+                    fontWeight: "700",
+                    fontSize: "13px",
                   }}
                 >
-                  {productCountByBrand[brand.id] || 0}
+                  {productCountByBrand[brand.id] || 0} sản phẩm
                 </span>
               </td>
 
               <td>
                 <span
                   style={{
-                    padding: "5px 10px",
-                    borderRadius: "12px",
-                    fontSize: "13px",
-                    fontWeight: "bold",
+                    padding: "4px 10px",
+                    borderRadius: "6px",
+                    fontSize: "12px",
+                    fontWeight: "700",
                     backgroundColor:
-                      brand.status === "INACTIVE" ? "#f8d7da" : "#d4edda",
-                    color: brand.status === "INACTIVE" ? "#721c24" : "#155724",
+                      brand.status === "INACTIVE" ? "#fee2e2" : "#dcfce7",
+                    color:
+                      brand.status === "INACTIVE" ? "#b91c1c" : "#15803d",
                   }}
                 >
                   {brand.status === "INACTIVE"
@@ -290,53 +371,109 @@ export default function AdminBrands() {
                 </span>
               </td>
 
-              <td>
-                <button
-                  onClick={() => handleEditName(brand)}
-                  style={{
-                    padding: "8px 12px",
-                    marginRight: "8px",
-                    backgroundColor: "#ffc107",
-                    color: "#000",
-                    border: "none",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    fontWeight: "bold",
-                  }}
-                >
-                  Sửa tên
-                </button>
+              <td style={{ textAlign: "center" }}>
+                <div style={{ display: "inline-flex", gap: "8px" }}>
+                  <button
+                    type="button"
+                    onClick={() => setEditNameModal({ isOpen: true, brand })}
+                    style={{
+                      padding: "6px 12px",
+                      backgroundColor: "#fef3c7",
+                      color: "#b45309",
+                      border: "1px solid #fde68a",
+                      borderRadius: "6px",
+                      cursor: "pointer",
+                      fontWeight: "600",
+                      fontSize: "13px",
+                    }}
+                  >
+                    <i className="fa-solid fa-pen"></i> Sửa tên
+                  </button>
 
-                <button
-                  onClick={() => handleToggleStatus(brand)}
-                  style={{
-                    padding: "8px 16px",
-                    backgroundColor:
-                      brand.status === "INACTIVE" ? "#28a745" : "#dc3545",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    fontWeight: "bold",
-                    minWidth: "110px",
-                  }}
-                >
-                  {brand.status === "INACTIVE" ? "Kích hoạt" : "Vô hiệu hóa"}
-                </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setToggleStatusModal({ isOpen: true, brand })
+                    }
+                    style={{
+                      padding: "6px 14px",
+                      backgroundColor:
+                        brand.status === "INACTIVE" ? "#10b981" : "#ef4444",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "6px",
+                      cursor: "pointer",
+                      fontWeight: "600",
+                      fontSize: "13px",
+                      minWidth: "95px",
+                    }}
+                  >
+                    {brand.status === "INACTIVE" ? "Kích hoạt" : "Khóa"}
+                  </button>
+                </div>
               </td>
             </tr>
           ))}
 
-          {sortedBrands.length === 0 && (
+          {paginatedBrands.length === 0 && (
             <tr>
-              <td colSpan="5" style={{ padding: "20px", textAlign: "center" }}>
-                Chưa có thương hiệu nào.
+              <td colSpan="5" style={{ padding: "30px", textAlign: "center" }}>
+                Không tìm thấy thương hiệu nào.
               </td>
             </tr>
           )}
-          
         </tbody>
       </table>
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        totalItems={sortedBrands.length}
+        pageSize={ITEMS_PER_PAGE}
+      />
+
+      {/* Edit Name Modal */}
+      <PromptModal
+        isOpen={editNameModal.isOpen}
+        title="Đổi tên thương hiệu"
+        label="Tên thương hiệu mới"
+        defaultValue={editNameModal.brand?.name || ""}
+        placeholder="Nhập tên thương hiệu mới..."
+        confirmText="Lưu thay đổi"
+        onConfirm={handleEditNameConfirm}
+        onCancel={() => setEditNameModal({ isOpen: false, brand: null })}
+        validate={(newName) => {
+          const trimmed = newName.trim().toLowerCase();
+          if (!trimmed) return null;
+          const isDuplicate = brands.some(
+            (b) =>
+              b.id !== editNameModal.brand?.id &&
+              b.name.trim().toLowerCase() === trimmed
+          );
+          if (isDuplicate) return "Tên thương hiệu này đã tồn tại trong hệ thống!";
+          return null;
+        }}
+      />
+
+      {/* Toggle Status Modal */}
+      <ConfirmModal
+        isOpen={toggleStatusModal.isOpen}
+        title="Xác nhận đổi trạng thái"
+        message={`Bạn có chắc muốn ${
+          toggleStatusModal.brand?.status === "INACTIVE"
+            ? "kích hoạt"
+            : "vô hiệu hóa"
+        } thương hiệu "${toggleStatusModal.brand?.name}"?`}
+        confirmText="Xác nhận"
+        type={
+          toggleStatusModal.brand?.status === "ACTIVE"
+            ? "danger"
+            : "primary"
+        }
+        onConfirm={handleToggleStatusConfirm}
+        onCancel={() => setToggleStatusModal({ isOpen: false, brand: null })}
+      />
     </div>
   );
 }

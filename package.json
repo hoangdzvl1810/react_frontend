@@ -3,11 +3,8 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "prestart": "node scripts/sync-db.cjs",
     "start": "react-scripts start",
-    "predev": "node scripts/sync-db.cjs",
     "dev": "react-scripts start",
-    "prebuild": "node scripts/sync-db.cjs",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "lint": "eslint src --ext .js,.jsx",

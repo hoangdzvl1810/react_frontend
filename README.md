@@ -17,10 +17,7 @@ Chạy JSON Server trong một terminal khác:
 npm run server
 ```
 
-API giả lập chạy tại `http://localhost:3001`.
-
-Trước khi chạy hoặc build, dữ liệu trong `db.json` được tự động đồng bộ vào
-`src/data/db.json` để ứng dụng vẫn có dữ liệu dự phòng khi JSON Server chưa chạy.
+API giả lập chạy tại `http://localhost:3001` và trực tiếp sử dụng dữ liệu từ `db.json` ở thư mục gốc.
 
 ## Các lệnh chính
 

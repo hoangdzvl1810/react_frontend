@@ -1,72 +1,81 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getCollection } from "../services/api";
-import { getStoredAccount } from "../utils/cartStorage";
+import { useAuth } from "../context/AuthContext";
+import { OrderDetailsModal } from "../components/Modal";
+import { getProductImage } from "../utils/productImages";
 
 export default function OrderHistory() {
+  const { account: user } = useAuth();
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   useEffect(() => {
     const fetchOrders = async () => {
-      const user = getStoredAccount();
       if (!user) return;
 
       try {
+        setLoading(true);
         const data = await getCollection("orders", {
           userId: user.id,
           _sort: "date",
           _order: "desc",
         });
 
-        setOrders(data);
+        setOrders(data || []);
       } catch (err) {
         console.error(err);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchOrders();
-  }, []);
-
-  const user = getStoredAccount();
+  }, [user?.id]);
 
   if (!user) {
     return (
-      <div style={{ padding: "50px", textAlign: "center" }}>
-        Vui lòng đăng nhập để xem lịch sử đơn hàng.{" "}
-        <Link to="/login">Đăng nhập</Link>
+      <div className="cart-page-wrap">
+        <div className="cart-empty-panel">
+          <i className="fa-solid fa-lock cart-empty-icon"></i>
+          <h2>Vui lòng đăng nhập</h2>
+          <p>Đăng nhập để theo dõi trạng thái đơn hàng và lịch sử mua sắm của bạn.</p>
+          <Link
+            to="/login"
+            className="cart-checkout-btn"
+            style={{ display: "inline-block", width: "auto", padding: "12px 28px" }}
+          >
+            Đăng nhập ngay
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div
-      style={{
-        padding: "40px",
-        maxWidth: "1200px",
-        margin: "0 auto",
-        minHeight: "60vh",
-      }}
-    >
-      <h2 style={{ marginBottom: "20px" }}>Lịch Sử Đơn Hàng Của Bạn</h2>
+    <main className="cart-page-wrap">
+      <div className="cart-header-title">
+        <h1>Lịch Sử Đơn Hàng Của Bạn</h1>
+        <p>Theo dõi tiến trình xử lý, vận chuyển và xem lại chi tiết hóa đơn.</p>
+      </div>
 
-      {orders.length === 0 ? (
-        <div
-          style={{
-            textAlign: "center",
-            padding: "50px",
-            backgroundColor: "#fff",
-            borderRadius: "10px",
-          }}
-        >
-          <p>Bạn chưa có đơn hàng nào.</p>
+      {loading ? (
+        <div style={{ padding: "60px", textAlign: "center", color: "#64748b" }}>
+          <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: "32px", marginBottom: "12px" }}></i>
+          <p>Đang tải danh sách đơn hàng...</p>
+        </div>
+      ) : orders.length === 0 ? (
+        <div className="cart-empty-panel">
+          <div className="cart-empty-icon">
+            <i className="fa-solid fa-clipboard-list"></i>
+          </div>
+          <h2>Bạn chưa có đơn hàng nào!</h2>
+          <p>Khám phá ngay các linh kiện máy tính chất lượng cao tại ProBuild PC.</p>
           <Link
             to="/categories"
-            className="btn-submit"
-            style={{
-              display: "inline-block",
-              width: "200px",
-              marginTop: "15px",
-            }}
+            className="cart-checkout-btn"
+            style={{ display: "inline-block", width: "auto", padding: "12px 28px" }}
           >
             Mua sắm ngay
           </Link>
@@ -75,60 +84,120 @@ export default function OrderHistory() {
         <div
           style={{
             backgroundColor: "#fff",
-            padding: "20px",
-            borderRadius: "10px",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+            padding: "24px",
+            borderRadius: "16px",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.04)",
+            border: "1px solid #f1f5f9",
+            overflowX: "auto",
           }}
         >
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr
                 style={{
-                  borderBottom: "2px solid #eee",
+                  borderBottom: "2px solid #e2e8f0",
                   textAlign: "left",
-                  backgroundColor: "#f9f9f9",
+                  backgroundColor: "#f8fafc",
                 }}
               >
-                <th style={{ padding: "15px" }}>Mã đơn hàng</th>
+                <th style={{ padding: "14px 16px" }}>Mã đơn</th>
                 <th>Ngày đặt</th>
                 <th>Sản phẩm</th>
                 <th>Tổng tiền</th>
                 <th>Thanh toán</th>
                 <th>Trạng thái</th>
+                <th style={{ textAlign: "center" }}>Hành động</th>
               </tr>
             </thead>
 
             <tbody>
               {orders.map((order) => (
-                <tr key={order.id} style={{ borderBottom: "1px solid #eee" }}>
-                  <td style={{ padding: "15px", fontWeight: "bold" }}>
+                <tr key={order.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                  <td style={{ padding: "16px", fontWeight: "800", color: "#0f172a" }}>
                     #{order.id}
                   </td>
-                  <td>{new Date(order.date).toLocaleString("vi-VN")}</td>
+                  <td style={{ fontSize: "14px", color: "#64748b" }}>
+                    {new Date(order.date).toLocaleString("vi-VN")}
+                  </td>
                   <td>
-                    {order.items?.map((item) => (
-                      <div key={item.productId ?? item.id}>
-                        {item.productName ?? item.name} × {item.quantity}
+                    {order.items?.map((item, idx) => (
+                      <div
+                        key={idx}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          marginBottom: "4px",
+                          fontSize: "13px",
+                        }}
+                      >
+                        {item.image && (
+                          <img
+                            src={getProductImage(item.image)}
+                            alt={item.productName || item.name}
+                            style={{
+                              width: "28px",
+                              height: "28px",
+                              borderRadius: "4px",
+                              objectFit: "contain",
+                            }}
+                          />
+                        )}
+                        <span>
+                          <strong>{item.productName ?? item.name}</strong> × {item.quantity}
+                        </span>
                       </div>
                     ))}
                   </td>
-                  <td style={{ color: "#e53e3e", fontWeight: "bold" }}>
+                  <td style={{ color: "#dc2626", fontWeight: "800", fontSize: "15px" }}>
                     {Number(order.totalPrice).toLocaleString("vi-VN")}đ
                   </td>
                   <td>
-                    {order.paymentMethod === "BANK_TRANSFER"
-                      ? "Chuyển khoản"
-                      : "COD"}
+                    <span style={{ fontSize: "13px", fontWeight: "600" }}>
+                      {order.paymentMethod === "BANK_TRANSFER"
+                        ? "Chuyển khoản"
+                        : "COD"}
+                    </span>
                     <br />
-                    <small>{order.paymentStatus || "Chưa thanh toán"}</small>
+                    <small
+                      className={`badge-payment ${
+                        order.paymentStatus === "Đã thanh toán"
+                          ? "paid"
+                          : "pending"
+                      }`}
+                    >
+                      {order.paymentStatus || "Chưa thanh toán"}
+                    </small>
                   </td>
-                  <td>{order.status}</td>
+                  <td>
+                    <span className={`badge-status status-${order.status?.replace(/\s+/g, "")}`}>
+                      {order.status}
+                    </span>
+                  </td>
+                  <td style={{ textAlign: "center" }}>
+                    <button
+                      type="button"
+                      className="btn-view-quick"
+                      onClick={() => setSelectedOrder(order)}
+                      style={{ padding: "8px 14px" }}
+                    >
+                      <i className="fa-solid fa-file-invoice"></i> Chi tiết
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
-    </div>
+
+      {/* Order detail modal */}
+      <OrderDetailsModal
+        isOpen={Boolean(selectedOrder)}
+        order={selectedOrder}
+        customerName={user?.fullName}
+        onClose={() => setSelectedOrder(null)}
+      />
+    </main>
   );
 }
