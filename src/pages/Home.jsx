@@ -6,7 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { useToast } from "../context/ToastContext";
 import Pagination from "../components/Pagination";
-
+//Demo
 const PAGE_SIZE = 16;
 
 export default function Home() {
